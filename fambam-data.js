@@ -123,10 +123,16 @@
       cache.counts = keep;
     },
     castVote: async function(pollId, choice){
-      if(getMyVote(pollId) === choice) return cache.counts[pollId] || {};
+      if(getMyVote(pollId) === choice) return this.removeVote(pollId);
       var data = await postJSON('vote', { pollId:pollId, optionId:choice, voterId:voterId() });
       cache.counts[pollId] = data.counts || {};
       setMyVote(pollId, choice);
+      return cache.counts[pollId];
+    },
+    removeVote: async function(pollId){
+      var data = await postJSON('vote', { pollId:pollId, remove:true, voterId:voterId() });
+      cache.counts[pollId] = data.counts || {};
+      try{ localStorage.removeItem(myVoteKey(pollId)); }catch(e){}
       return cache.counts[pollId];
     },
     setCounts: async function(pollId, counts){
