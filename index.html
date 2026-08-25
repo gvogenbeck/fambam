@@ -161,7 +161,11 @@
 
   @media (max-width:820px){
     .steps,.polls,.rulegrid,.rulegrid.two{grid-template-columns:1fr}
-    .brow{grid-template-columns:36px 1fr;row-gap:8px}
+    .brow{grid-template-columns:40px 1fr 1fr;row-gap:10px;column-gap:10px}
+    .brow .slot{grid-column:1;grid-row:1}
+    .brow .mgr{grid-column:2 / span 2;grid-row:1}
+    .brow .chip:not(.pay){grid-column:2;grid-row:2}
+    .brow .chip.pay{grid-column:3;grid-row:2}
     .brow.head{display:none}
     .step .jersey{font-size:6.4rem}
   }
