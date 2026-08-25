@@ -31,7 +31,7 @@
   .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
 
   .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(7,11,18,.82);border-bottom:1px solid var(--line)}
-  .topbar .wrap{display:flex;align-items:center;gap:18px;height:60px}
+  .topbar .wrap{display:flex;align-items:center;gap:18px;min-height:60px;position:relative}
   .mark{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:.06em;text-transform:uppercase}
   a.mark{color:inherit;text-decoration:none}
   .mark span{color:var(--orange)}
@@ -40,6 +40,23 @@
   .topnav a:hover,.topnav a:focus-visible{color:var(--chalk)}
   .topnav a.cta{color:var(--orange);border:1px solid rgba(251,79,20,.5);padding:6px 12px;font-weight:600}
   .topnav a.cta:hover,.topnav a.cta:focus-visible{color:#0A0A0A;background:var(--orange);border-color:var(--orange)}
+
+  .navtoggle{display:none;margin-left:auto;background:none;border:1px solid var(--line-strong);
+    width:38px;height:34px;flex-direction:column;justify-content:center;align-items:center;gap:5px;cursor:pointer;flex-shrink:0}
+  .navtoggle span{display:block;width:18px;height:2px;background:var(--chalk)}
+  @media (max-width:860px){
+    .navtoggle{display:flex}
+    .topnav{
+      display:none;margin-left:0;
+      position:absolute;left:0;right:0;top:100%;
+      flex-direction:column;align-items:flex-start;gap:2px;
+      background:rgba(7,11,18,.98);border:1px solid var(--line);border-top:none;
+      padding:8px 22px 16px;z-index:30
+    }
+    .topnav.open{display:flex}
+    .topnav a{padding:10px 0;width:100%}
+    .topnav a.cta{margin-top:6px;width:auto}
+  }
 
   .hero{padding:76px 0 54px}
   .hero h1{font-size:clamp(3.2rem,11vw,7.4rem);line-height:.84;letter-spacing:-.01em}
@@ -157,7 +174,10 @@
 <div class="topbar">
   <div class="wrap">
     <a href="index.html" class="mark">FamBam <span>FF</span></a>
-    <nav class="topnav">
+    <button class="navtoggle" id="navToggle" aria-expanded="false" aria-controls="topnav" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="topnav" id="topnav">
       <a href="#start">Start here</a>
       <a href="#vote">Vote</a>
       <a href="#roster">Who's in</a>
@@ -167,6 +187,20 @@
     </nav>
   </div>
 </div>
+<script>
+(function(){
+  "use strict";
+  var btn = document.getElementById('navToggle'), nav = document.getElementById('topnav');
+  if(!btn || !nav) return;
+  btn.addEventListener('click', function(){
+    var open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  nav.addEventListener('click', function(e){
+    if(e.target.tagName === 'A'){ nav.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+  });
+})();
+</script>
 
 <header class="hero">
   <div class="wrap">
