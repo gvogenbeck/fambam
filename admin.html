@@ -124,6 +124,7 @@
   #lock input:focus{outline:none;border-color:var(--orange)}
   #lock .err{color:#E0533B;font-family:"IBM Plex Mono",monospace;font-size:.74rem;height:16px;margin-bottom:10px}
   body.locked > *:not(#lock){display:none}
+  body:not(.locked) #lock{display:none}
 </style>
 </head>
 <body class="locked">
