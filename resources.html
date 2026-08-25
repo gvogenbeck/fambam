@@ -33,6 +33,7 @@
   .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(7,11,18,.82);border-bottom:1px solid var(--line)}
   .topbar .wrap{display:flex;align-items:center;gap:18px;height:60px}
   .mark{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:.06em;text-transform:uppercase}
+  a.mark{color:inherit;text-decoration:none}
   .mark span{color:var(--orange)}
   .topnav{margin-left:auto;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
   .topnav a{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-decoration:none}
@@ -96,7 +97,7 @@
 
 <div class="topbar">
   <div class="wrap">
-    <div class="mark">FamBam <span>FF</span></div>
+    <a href="index.html" class="mark">FamBam <span>FF</span></a>
     <nav class="topnav">
       <a href="index.html">League hub</a>
       <a href="index.html#vote">Vote</a>
@@ -114,6 +115,36 @@
     <div class="halfppr"><strong>Set every ranking to Half PPR (0.5 PPR).</strong> Most sites default to standard or full PPR. Our league gives 0.5 points per catch, so switching the setting changes who's ranked where — especially receiving backs and slot receivers.</div>
   </div>
 </header>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">First-timers</span><h2>Fantasy Football Basics</h2></div>
+    <div class="grid">
+      <a class="res" href="https://www.fantasypros.com/2026/06/fantasy-football-101-ultimate-beginners-guide/" target="_blank" rel="noopener">
+        <div class="top"><h3>How to play, start to finish</h3><span class="go">fantasypros.com &rarr;</span></div>
+        <p>Plain-English walkthrough of drafting, lineups, waivers, and trades. Read this one first if the whole thing feels like a foreign language.</p>
+        <div class="tags"><span class="tag start">Start here</span><span class="tag free">Free</span></div>
+      </a>
+      <a class="res" href="https://www.reddit.com/r/fantasyfootball/wiki/index/" target="_blank" rel="noopener">
+        <div class="top"><h3>r/fantasyfootball wiki</h3><span class="go">reddit.com &rarr;</span></div>
+        <p>A community-written beginner guide plus the busiest fantasy forum anywhere. The daily "who do I start" threads are surprisingly useful in-season.</p>
+        <div class="tags"><span class="tag start">Start here</span><span class="tag free">Free</span><span class="tag">Community</span></div>
+      </a>
+      <a class="res" href="https://www.thefantasyfootballers.com/" target="_blank" rel="noopener">
+        <div class="top"><h3>The Fantasy Footballers</h3><span class="go">thefantasyfootballers.com &rarr;</span></div>
+        <p>The biggest fantasy podcast, and the friendliest to newcomers. Their preseason draft-prep episodes will get you dangerous in a week of commutes.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Podcast</span></div>
+      </a>
+      <a class="res" href="https://www.fantasypros.com/nfl/adp/overall.php" target="_blank" rel="noopener">
+        <div class="top"><h3>Average draft position (ADP)</h3><span class="go">fantasypros.com &rarr;</span></div>
+        <p>Where players typically get picked across thousands of real drafts. The single best tool for knowing whether you can wait a round on someone.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Draft day</span></div>
+      </a>
+    </div>
+  </div>
+</section>
 
 <div class="wrap"><div class="divider"></div></div>
 
@@ -150,36 +181,6 @@
         <div class="top"><h3>Footballguys</h3><span class="go">footballguys.com &rarr;</span></div>
         <p>The old guard. Deep player-by-player write-ups and staff rankings that explain the reasoning instead of just handing you a number. Their free daily newsletter is genuinely worth the inbox space.</p>
         <div class="tags"><span class="tag">Free + paid</span><span class="tag">Deep dives</span><span class="tag">Newsletter</span></div>
-      </a>
-    </div>
-  </div>
-</section>
-
-<div class="wrap"><div class="divider"></div></div>
-
-<section>
-  <div class="wrap">
-    <div class="shead"><span class="yard">First-timers</span><h2>Fantasy Football Basics</h2></div>
-    <div class="grid">
-      <a class="res" href="https://www.fantasypros.com/2026/06/fantasy-football-101-ultimate-beginners-guide/" target="_blank" rel="noopener">
-        <div class="top"><h3>How to play, start to finish</h3><span class="go">fantasypros.com &rarr;</span></div>
-        <p>Plain-English walkthrough of drafting, lineups, waivers, and trades. Read this one first if the whole thing feels like a foreign language.</p>
-        <div class="tags"><span class="tag start">Start here</span><span class="tag free">Free</span></div>
-      </a>
-      <a class="res" href="https://www.reddit.com/r/fantasyfootball/wiki/index/" target="_blank" rel="noopener">
-        <div class="top"><h3>r/fantasyfootball wiki</h3><span class="go">reddit.com &rarr;</span></div>
-        <p>A community-written beginner guide plus the busiest fantasy forum anywhere. The daily "who do I start" threads are surprisingly useful in-season.</p>
-        <div class="tags"><span class="tag start">Start here</span><span class="tag free">Free</span><span class="tag">Community</span></div>
-      </a>
-      <a class="res" href="https://www.thefantasyfootballers.com/" target="_blank" rel="noopener">
-        <div class="top"><h3>The Fantasy Footballers</h3><span class="go">thefantasyfootballers.com &rarr;</span></div>
-        <p>The biggest fantasy podcast, and the friendliest to newcomers. Their preseason draft-prep episodes will get you dangerous in a week of commutes.</p>
-        <div class="tags"><span class="tag free">Free</span><span class="tag">Podcast</span></div>
-      </a>
-      <a class="res" href="https://www.fantasypros.com/nfl/adp/overall.php" target="_blank" rel="noopener">
-        <div class="top"><h3>Average draft position (ADP)</h3><span class="go">fantasypros.com &rarr;</span></div>
-        <p>Where players typically get picked across thousands of real drafts. The single best tool for knowing whether you can wait a round on someone.</p>
-        <div class="tags"><span class="tag free">Free</span><span class="tag">Draft day</span></div>
       </a>
     </div>
   </div>

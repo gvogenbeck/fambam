@@ -28,6 +28,7 @@
   .topbar{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(7,11,18,.86);border-bottom:1px solid var(--line)}
   .topbar .wrap{display:flex;align-items:center;gap:16px;height:58px}
   .mark{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:.06em;text-transform:uppercase}
+  a.mark{color:inherit;text-decoration:none}
   .mark span{color:var(--orange)}
   .badge{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
     border:1px solid var(--blue);color:var(--blue);padding:4px 9px}
@@ -163,7 +164,7 @@
 
 <div class="topbar">
   <div class="wrap">
-    <div class="mark">FamBam <span>FF</span></div>
+    <a href="index.html" class="mark">FamBam <span>FF</span></a>
     <span class="badge">Commissioner</span>
     <span id="saved">Saved</span>
     <nav class="topnav">
