@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resources — FamBam Fantasy Football</title>
+<meta name="description" content="Rankings, cheat sheets, beginner guides, and draft-day tools for the FamBam Fantasy Football league.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Chivo:wght@300;400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --field:#070B12;--panel:#0E1626;--panel-2:#131F33;--deep:#002244;
+    --orange:#FB4F14;--orange-soft:#FF8A55;--blue:#4C8FD6;
+    --chalk:#EEF3F8;--muted:#8C9AAC;--line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.16);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;
+    background:
+      radial-gradient(1100px 620px at 78% -12%, rgba(251,79,20,.16), transparent 62%),
+      radial-gradient(900px 620px at 8% 0%, rgba(0,34,68,.85), transparent 60%),
+      var(--field);
+    color:var(--chalk);font-family:"Chivo",system-ui,sans-serif;font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.045) 0 1px,transparent 1px 88px);
+    mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent)}
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 22px}
+  a{color:var(--orange-soft)}
+  h1,h2,h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:800;letter-spacing:.01em;text-transform:uppercase;margin:0}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+
+  .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(7,11,18,.82);border-bottom:1px solid var(--line)}
+  .topbar .wrap{display:flex;align-items:center;gap:18px;height:60px}
+  .mark{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:.06em;text-transform:uppercase}
+  .mark span{color:var(--orange)}
+  .topnav{margin-left:auto;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .topnav a{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+  .topnav a:hover,.topnav a:focus-visible{color:var(--chalk)}
+  .topnav a.on{color:var(--orange)}
+
+  .hero{padding:66px 0 40px}
+  .hero h1{font-size:clamp(2.6rem,8vw,5.2rem);line-height:.88}
+  .hero h1 em{font-style:normal;color:transparent;-webkit-text-stroke:2px var(--orange)}
+  .hero p{max-width:56ch;color:#C9D4E1;font-size:1.02rem;margin:18px 0 0}
+  .halfppr{margin-top:26px;border-left:3px solid var(--orange);background:rgba(251,79,20,.07);padding:16px 20px;font-size:.94rem;color:#D7E0EA;max-width:62ch}
+
+  section{padding:52px 0}
+  .divider{height:14px;background:
+     repeating-linear-gradient(90deg,var(--line-strong) 0 1px,transparent 1px 22px) center/100% 9px no-repeat,
+     linear-gradient(90deg,transparent,var(--line-strong),transparent) center/100% 1px no-repeat}
+  .shead{display:flex;align-items:baseline;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+  .shead h2{font-size:clamp(1.6rem,4.2vw,2.4rem);line-height:1}
+  .shead .yard{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.24em;color:var(--orange)}
+  .sub{color:var(--muted);max-width:66ch;margin:0 0 28px;font-size:.95rem}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .res{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);
+    padding:22px 24px;position:relative;transition:border-color .15s ease,transform .15s ease,background .15s ease}
+  .res:hover{border-color:var(--orange);transform:translateY(-2px);background:var(--panel-2)}
+  .res .top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .res h3{font-size:1.32rem}
+  .res .go{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.14em;color:var(--muted);white-space:nowrap}
+  .res:hover .go{color:var(--orange)}
+  .res p{margin:8px 0 0;font-size:.92rem;color:#BFCBD9}
+  .tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+  .tag{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+    border:1px solid var(--line-strong);color:var(--muted);padding:4px 8px}
+  .tag.free{border-color:rgba(63,191,127,.5);color:#5FD3A0}
+  .tag.start{border-color:var(--orange);color:var(--orange)}
+
+  .checklist{background:var(--panel);border:1px solid var(--line);padding:8px 26px 22px}
+  .checklist li{margin:14px 0;color:#C6D1DE;font-size:.95rem}
+  .checklist li strong{font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;
+    letter-spacing:.04em;font-size:1.1rem;color:var(--chalk);display:block}
+  .checklist{counter-reset:step}
+  .checklist ol{list-style:none;padding:0;margin:0;counter-reset:step}
+  .checklist ol li{position:relative;padding-left:44px;counter-increment:step}
+  .checklist ol li::before{content:counter(step,decimal-leading-zero);position:absolute;left:0;top:2px;
+    font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--orange)}
+
+  .terms{display:grid;grid-template-columns:1fr 1fr;gap:0 32px}
+  .term{border-top:1px solid var(--line);padding:14px 0}
+  .term dt{font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:1.12rem}
+  .term dd{margin:3px 0 0;color:var(--muted);font-size:.9rem}
+
+  footer{border-top:1px solid var(--line);padding:38px 0 60px;color:var(--muted);font-size:.84rem}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+
+  @media (max-width:820px){.grid,.terms{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  :focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="mark">FamBam <span>FF</span></div>
+    <nav class="topnav">
+      <a href="index.html">League hub</a>
+      <a href="index.html#vote">Vote</a>
+      <a href="index.html#rules">Rules</a>
+      <a href="resources.html" class="on">Resources</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Homework, but the fun kind</p>
+    <h1>Scouting <em>Department</em></h1>
+    <p>Never played before? Start with the four cards marked <strong>start here</strong> and stop. That's genuinely enough to draft a competitive team. Everything below that is for people who want to go deeper.</p>
+    <div class="halfppr"><strong>Set every ranking to Half PPR (0.5 PPR).</strong> Most sites default to standard or full PPR. Our league gives 0.5 points per catch, so switching the setting changes who's ranked where — especially receiving backs and slot receivers.</div>
+  </div>
+</header>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">Who to draft</span><h2>Rankings &amp; Cheat Sheets</h2></div>
+    <div class="grid">
+      <a class="res" href="https://www.fantasypros.com/nfl/rankings/half-point-ppr-cheatsheets.php" target="_blank" rel="noopener">
+        <div class="top"><h3>FantasyPros</h3><span class="go">fantasypros.com &rarr;</span></div>
+        <p>The one site to use if you only use one. It averages rankings from dozens of experts into a consensus board, and the free printable cheat sheet is already set to half PPR at this link.</p>
+        <div class="tags"><span class="tag start">Start here</span><span class="tag free">Free</span><span class="tag">Printable</span></div>
+      </a>
+      <a class="res" href="https://football.fantasysports.yahoo.com/f1/1410536" target="_blank" rel="noopener">
+        <div class="top"><h3>Yahoo Fantasy</h3><span class="go">Our league &rarr;</span></div>
+        <p>Yahoo's own rankings and projections are built into the league you already joined, and they're tuned to our exact scoring settings. Free, decent, and zero setup.</p>
+        <div class="tags"><span class="tag start">Start here</span><span class="tag free">Free</span></div>
+      </a>
+      <a class="res" href="https://www.espn.com/fantasy/football/" target="_blank" rel="noopener">
+        <div class="top"><h3>ESPN Fantasy</h3><span class="go">espn.com &rarr;</span></div>
+        <p>Free rankings, positional tiers, and a huge library of beginner-friendly articles. Good second opinion when FantasyPros and Yahoo disagree on a player.</p>
+        <div class="tags"><span class="tag free">Free</span></div>
+      </a>
+      <a class="res" href="https://www.pff.com/fantasy" target="_blank" rel="noopener">
+        <div class="top"><h3>Pro Football Focus</h3><span class="go">pff.com &rarr;</span></div>
+        <p>Grades every player on every snap. The free content is solid; the paid tier is where the deep target and route data lives. For the curious, not the casual.</p>
+        <div class="tags"><span class="tag">Free + paid</span><span class="tag">Advanced</span></div>
+      </a>
+      <a class="res" href="https://www.4for4.com/" target="_blank" rel="noopener">
+        <div class="top"><h3>4for4</h3><span class="go">4for4.com &rarr;</span></div>
+        <p>Long-running projection shop with strong accuracy records and useful strength-of-schedule tools. Mostly subscription, but the free articles are worth a read.</p>
+        <div class="tags"><span class="tag">Paid</span><span class="tag">Projections</span></div>
+      </a>
+      <a class="res" href="https://www.footballguys.com/" target="_blank" rel="noopener">
+        <div class="top"><h3>Footballguys</h3><span class="go">footballguys.com &rarr;</span></div>
+        <p>The old guard. Deep player-by-player write-ups and staff rankings that explain the reasoning instead of just handing you a number. Their free daily newsletter is genuinely worth the inbox space.</p>
+        <div class="tags"><span class="tag">Free + paid</span><span class="tag">Deep dives</span><span class="tag">Newsletter</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">First-timers</span><h2>Fantasy Football Basics</h2></div>
+    <div class="grid">
+      <a class="res" href="https://www.fantasypros.com/2026/06/fantasy-football-101-ultimate-beginners-guide/" target="_blank" rel="noopener">
+        <div class="top"><h3>How to play, start to finish</h3><span class="go">fantasypros.com &rarr;</span></div>
+        <p>Plain-English walkthrough of drafting, lineups, waivers, and trades. Read this one first if the whole thing feels like a foreign language.</p>
+        <div class="tags"><span class="tag start">Start here</span><span class="tag free">Free</span></div>
+      </a>
+      <a class="res" href="https://www.reddit.com/r/fantasyfootball/wiki/index/" target="_blank" rel="noopener">
+        <div class="top"><h3>r/fantasyfootball wiki</h3><span class="go">reddit.com &rarr;</span></div>
+        <p>A community-written beginner guide plus the busiest fantasy forum anywhere. The daily "who do I start" threads are surprisingly useful in-season.</p>
+        <div class="tags"><span class="tag start">Start here</span><span class="tag free">Free</span><span class="tag">Community</span></div>
+      </a>
+      <a class="res" href="https://www.thefantasyfootballers.com/" target="_blank" rel="noopener">
+        <div class="top"><h3>The Fantasy Footballers</h3><span class="go">thefantasyfootballers.com &rarr;</span></div>
+        <p>The biggest fantasy podcast, and the friendliest to newcomers. Their preseason draft-prep episodes will get you dangerous in a week of commutes.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Podcast</span></div>
+      </a>
+      <a class="res" href="https://www.fantasypros.com/nfl/adp/overall.php" target="_blank" rel="noopener">
+        <div class="top"><h3>Average draft position (ADP)</h3><span class="go">fantasypros.com &rarr;</span></div>
+        <p>Where players typically get picked across thousands of real drafts. The single best tool for knowing whether you can wait a round on someone.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Draft day</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">In-season</span><h2>News, injuries, tools</h2></div>
+    <div class="grid">
+      <a class="res" href="https://www.rotowire.com/football/injury-report.php" target="_blank" rel="noopener">
+        <div class="top"><h3>RotoWire injury report</h3><span class="go">rotowire.com &rarr;</span></div>
+        <p>Fastest free injury feed with practice participation for every team. Check it Friday afternoon and again 90 minutes before kickoff.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Weekly</span></div>
+      </a>
+      <a class="res" href="https://www.ourlads.com/nfldepthcharts/" target="_blank" rel="noopener">
+        <div class="top"><h3>Ourlads depth charts</h3><span class="go">ourlads.com &rarr;</span></div>
+        <p>Who is actually starting, updated constantly. When a starter goes down, this tells you which backup to grab off waivers before anyone else does.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Waivers</span></div>
+      </a>
+      <a class="res" href="https://www.fantasypros.com/nfl/start/" target="_blank" rel="noopener">
+        <div class="top"><h3>Start / Sit assistant</h3><span class="go">fantasypros.com &rarr;</span></div>
+        <p>Feed it two players and it tells you which one the experts favor this week. Settles most lineup arguments in about ten seconds.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Weekly</span></div>
+      </a>
+      <a class="res" href="https://www.pro-football-reference.com/" target="_blank" rel="noopener">
+        <div class="top"><h3>Pro Football Reference</h3><span class="go">pro-football-reference.com &rarr;</span></div>
+        <p>The raw box scores and career stats behind everyone else's analysis. Free, ad-light, and the place to settle a factual argument at the dinner table.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Stats</span></div>
+      </a>
+      <a class="res" href="https://www.playerprofiler.com/" target="_blank" rel="noopener">
+        <div class="top"><h3>PlayerProfiler</h3><span class="go">playerprofiler.com &rarr;</span></div>
+        <p>Advanced metrics — target share, snap counts, opportunity — with free player pages. Useful for spotting a breakout before the rankings catch up.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Advanced</span></div>
+      </a>
+      <a class="res" href="https://www.fantasylife.com/" target="_blank" rel="noopener">
+        <div class="top"><h3>Fantasy Life</h3><span class="go">fantasylife.com &rarr;</span></div>
+        <p>Daily newsletter that packages the week's news into something readable in five minutes. Good if you want to stay current without living on Twitter.</p>
+        <div class="tags"><span class="tag free">Free</span><span class="tag">Newsletter</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">Draft day</span><h2>Show up ready</h2></div>
+    <div class="checklist">
+      <ol>
+        <li><strong>Confirm app access</strong>Have the Yahoo Fantasy app ready, and verify you can get into the league and see your team.</li>
+        <li><strong>Ditch the default team name</strong>Update your team name and logo. Yahoo defaults are for lazy noobs.</li>
+        <li><strong>Know your settings</strong>Know your league settings and roster slots before the clock starts.</li>
+        <li><strong>Do your homework</strong>Have your research done and understand your pre-draft rankings.</li>
+        <li><strong>Ask before you arrive</strong>Ask your commissioner any questions you have — better now than mid-draft.</li>
+        <li><strong>Cash or Venmo</strong>Bringing cash is fine, but you can also Venmo the commissioner your entry fee beforehand.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">Words you'll hear</span><h2>Glossary</h2></div>
+    <dl class="terms">
+      <div class="term"><dt>ADP</dt><dd>Average draft position — the round and pick where a player usually goes.</dd></div>
+      <div class="term"><dt>Snake draft</dt><dd>Pick order reverses each round, so the last picker in round one picks first in round two.</dd></div>
+      <div class="term"><dt>Tiers</dt><dd>Grouping similar players so you know when a position is about to fall off a cliff.</dd></div>
+      <div class="term"><dt>PPR</dt><dd>Points per reception. A scoring style where every catch adds points on top of yardage and touchdowns — full PPR awards a full point per catch, half PPR awards half a point, and standard scoring awards none.</dd></div>
+      <div class="term"><dt>Flex (W/R/T)</dt><dd>A starting spot you can fill with a wide receiver, running back, or tight end.</dd></div>
+      <div class="term"><dt>Free agent</dt><dd>A player on no one's roster, available to add at any time — the pool everyone's pulling from on waivers.</dd></div>
+      <div class="term"><dt>Waivers</dt><dd>The claim system for unowned players. Ours process Tuesday at game time on a rolling priority list.</dd></div>
+      <div class="term"><dt>Injured reserve (IR)</dt><dd>A roster spot for players out with a qualifying injury. IR players don't count against your regular roster limit.</dd></div>
+      <div class="term"><dt>Handcuff</dt><dd>The direct backup to a starting running back you own — insurance against an injury.</dd></div>
+      <div class="term"><dt>Bye week</dt><dd>Each NFL team sits out one week. Your players score zero that week, so plan your bench.</dd></div>
+      <div class="term"><dt>Streaming</dt><dd>Swapping your defense or kicker each week to chase a favorable matchup.</dd></div>
+      <div class="term"><dt>Target share</dt><dd>The percentage of a team's passes thrown at one receiver. High share equals reliable points.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>FamBam Fantasy Football &middot; League 1410536 &middot; Draft: Sat, Sept 5</span>
+    <span><a href="index.html">&larr; Back to the league hub</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

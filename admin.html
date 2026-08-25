@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commissioner — FamBam Fantasy Football</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Chivo:wght@300;400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --field:#070B12;--panel:#0E1626;--panel-2:#131F33;
+    --orange:#FB4F14;--orange-soft:#FF8A55;--blue:#4C8FD6;
+    --chalk:#EEF3F8;--muted:#8C9AAC;--line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.16);--ok:#3FBF7F;--warn:#FFC24A;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(900px 520px at 82% -10%, rgba(76,143,214,.14), transparent 62%),
+      radial-gradient(800px 520px at 6% 0%, rgba(0,34,68,.8), transparent 60%),
+      var(--field);
+    color:var(--chalk);font-family:"Chivo",system-ui,sans-serif;font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+  a{color:var(--orange-soft)}
+  h1,h2,h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin:0}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+
+  .topbar{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(7,11,18,.86);border-bottom:1px solid var(--line)}
+  .topbar .wrap{display:flex;align-items:center;gap:16px;height:58px}
+  .mark{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:.06em;text-transform:uppercase}
+  .mark span{color:var(--orange)}
+  .badge{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+    border:1px solid var(--blue);color:var(--blue);padding:4px 9px}
+  .topnav{margin-left:auto;display:flex;gap:18px;align-items:center}
+  .topnav a{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+  .topnav a:hover{color:var(--chalk)}
+  #saved{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ok);opacity:0;transition:opacity .3s ease}
+  #saved.show{opacity:1}
+
+  header.page{padding:44px 0 10px}
+  header.page h1{font-size:clamp(2.2rem,6vw,3.4rem);line-height:.9}
+  header.page p{color:#C4CFDC;max-width:62ch;margin:14px 0 0;font-size:.98rem}
+  .warnbar{margin:22px 0 0;border-left:3px solid var(--warn);background:rgba(255,194,74,.08);padding:14px 18px;font-size:.9rem;color:#E6DCC4}
+
+  section{padding:38px 0}
+  .shead{display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+  .shead h2{font-size:1.7rem}
+  .shead .yard{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.22em;color:var(--orange)}
+  .sub{color:var(--muted);max-width:66ch;margin:0 0 22px;font-size:.92rem}
+
+  .panel{background:var(--panel);border:1px solid var(--line)}
+  input[type=text],input[type=datetime-local],textarea{
+    background:var(--panel-2);border:1px solid var(--line);color:var(--chalk);
+    font-family:"Chivo",sans-serif;font-size:.95rem;padding:10px 12px;width:100%}
+  input[type=number]{background:var(--panel-2);border:1px solid var(--line);color:var(--chalk);
+    font-family:"IBM Plex Mono",monospace;font-size:.9rem;padding:9px 10px;width:78px;text-align:center}
+  input:focus,textarea:focus{outline:none;border-color:var(--orange)}
+  label.f{display:block;font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+
+  /* roster */
+  .mrow{display:grid;grid-template-columns:40px 1fr 122px 104px 40px;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
+  .mrow.head{background:var(--panel-2);padding:8px 16px}
+  .mrow.head span{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .mrow:last-child{border-bottom:0}
+  .slot{font-family:"IBM Plex Mono",monospace;font-size:.82rem;color:var(--orange)}
+  .toggle{display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
+  .toggle input{position:absolute;opacity:0;width:0;height:0}
+  .track{width:42px;height:23px;border-radius:999px;background:#22304A;border:1px solid var(--line-strong);position:relative;transition:background .18s ease}
+  .track::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#8FA2B8;transition:transform .18s ease,background .18s ease}
+  .toggle input:checked + .track{background:rgba(63,191,127,.28);border-color:var(--ok)}
+  .toggle input:checked + .track::after{transform:translateX(19px);background:var(--ok)}
+  .toggle.pay input:checked + .track{background:rgba(251,79,20,.28);border-color:var(--orange)}
+  .toggle.pay input:checked + .track::after{background:var(--orange)}
+  .toggle input:focus-visible + .track{outline:2px solid var(--orange);outline-offset:2px}
+  .tlabel{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+  .btn{background:var(--orange);color:#0A0A0A;border:0;cursor:pointer;
+    font-family:"Barlow Condensed",sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.07em;font-size:.98rem;padding:11px 20px}
+  .btn:hover{background:var(--orange-soft)}
+  .btn.ghost{background:transparent;color:var(--chalk);border:1px solid var(--line-strong)}
+  .btn.ghost:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.sm{font-size:.84rem;padding:8px 14px}
+  .x{background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer;width:30px;height:30px;line-height:1;font-size:1rem}
+  .x:hover{border-color:#E0533B;color:#E0533B}
+  .rowactions{display:flex;gap:10px;flex-wrap:wrap;padding:16px}
+
+  /* polls */
+  .poll{border:1px solid var(--line);background:var(--panel);padding:22px;margin-bottom:16px}
+  .pollhead{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .pollhead .pid{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.14em;color:var(--muted);border:1px solid var(--line);padding:4px 8px}
+  .pollhead .spacer{flex:1}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+  .orow{display:grid;grid-template-columns:1fr 78px 40px;gap:10px;align-items:center;margin-bottom:9px}
+  .ohead{display:grid;grid-template-columns:1fr 78px 40px;gap:10px;margin-bottom:7px}
+  .ohead span{font-family:"IBM Plex Mono",monospace;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .ohead span:nth-child(2){text-align:center}
+  .pollfoot{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+  .pollfoot .total{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.12em;color:var(--muted);margin-left:auto}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .panel.pad{padding:22px}
+  textarea{min-height:150px;font-family:"IBM Plex Mono",monospace;font-size:.76rem;line-height:1.5;resize:vertical}
+  .danger{border-color:rgba(224,83,59,.4)}
+  .danger h3{color:#E0533B}
+
+  footer{border-top:1px solid var(--line);padding:34px 0 60px;color:var(--muted);font-size:.82rem;margin-top:30px}
+
+  @media (max-width:760px){
+    .mrow{grid-template-columns:32px 1fr;row-gap:10px}
+    .mrow.head{display:none}
+    .fields,.grid2{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  :focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+
+  /* lock screen */
+  #lock{position:fixed;inset:0;z-index:100;background:var(--field);display:flex;align-items:center;justify-content:center;padding:20px}
+  #lock .box{width:100%;max-width:340px;text-align:center}
+  #lock h1{font-size:1.7rem;margin-bottom:6px}
+  #lock p{color:var(--muted);font-size:.88rem;margin:0 0 22px}
+  #lock input{background:var(--panel-2);border:1px solid var(--line);color:var(--chalk);
+    font-family:"IBM Plex Mono",monospace;font-size:1rem;letter-spacing:.1em;text-align:center;
+    padding:12px 14px;width:100%;margin-bottom:12px}
+  #lock input:focus{outline:none;border-color:var(--orange)}
+  #lock .err{color:#E0533B;font-family:"IBM Plex Mono",monospace;font-size:.74rem;height:16px;margin-bottom:10px}
+  body.locked > *:not(#lock){display:none}
+</style>
+</head>
+<body class="locked">
+<div id="lock">
+  <div class="box">
+    <p class="eyebrow">FamBam FF</p>
+    <h1>Commissioner access</h1>
+    <p>This page is just behind a shared password — enter it to continue.</p>
+    <input type="password" id="lockInput" placeholder="Password" autocomplete="off" autofocus>
+    <div class="err" id="lockErr"></div>
+    <button class="btn sm" id="lockGo">Enter</button>
+  </div>
+</div>
+<script>
+(function(){
+  "use strict";
+  var PASS = "football";
+  var body = document.body, input = document.getElementById('lockInput'), err = document.getElementById('lockErr');
+  function tryUnlock(){
+    if(input.value === PASS){
+      try{ sessionStorage.setItem('fambam.admin.unlocked','1'); }catch(e){}
+      body.classList.remove('locked');
+    } else {
+      err.textContent = 'Wrong password — try again.';
+      input.value = '';
+      input.focus();
+    }
+  }
+  try{
+    if(sessionStorage.getItem('fambam.admin.unlocked') === '1') body.classList.remove('locked');
+  }catch(e){}
+  document.getElementById('lockGo').addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryUnlock(); });
+})();
+</script>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="mark">FamBam <span>FF</span></div>
+    <span class="badge">Commissioner</span>
+    <span id="saved">Saved</span>
+    <nav class="topnav">
+      <a href="index.html">View league hub</a>
+      <a href="resources.html">Resources</a>
+    </nav>
+  </div>
+</div>
+
+<header class="page">
+  <div class="wrap">
+    <p class="eyebrow">Control room</p>
+    <h1>League admin</h1>
+    <p>Edit the roster board, run the polls, and set the facts in the hero. Every change saves the moment you make it and shows up on the league hub on refresh.</p>
+    <div class="warnbar"><strong>No sign-in yet.</strong> Anyone who opens this page can change league data. Fine while it lives on your machine — put auth in front of it before this goes online.</div>
+    <div class="warnbar" id="archiveBanner" style="display:none;border-left-color:var(--orange);background:rgba(251,79,20,.08)"><strong>Site archived.</strong> Editing is turned off for this season. See <code>REACTIVATE.md</code> in the repo for how to bring it back for a new year.</div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">Roster board</span><h2>Managers</h2></div>
+    <p class="sub">Names appear in this order on the hub. Flip a switch when someone joins the Yahoo league or hands over their buy-in.</p>
+    <div class="panel">
+      <div class="mrow head"><span>#</span><span>Name</span><span>Signed up</span><span>Paid</span><span></span></div>
+      <div id="mgrHost"></div>
+      <div class="rowactions">
+        <button class="btn sm" id="addMgr">Add manager</button>
+        <button class="btn sm ghost" id="clearFlags">Clear all switches</button>
+        <button class="btn sm ghost" id="restoreNames">Restore the original ten</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">Voting</span><h2>Polls</h2></div>
+    <p class="sub">Edit a question, rename options, or type over a vote count to record answers people gave you in person. Deleting a poll removes it from the hub and throws away its votes.</p>
+    <div id="pollHost"></div>
+    <button class="btn" id="addPoll">Add a poll</button>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">Hero</span><h2>League facts</h2></div>
+    <p class="sub">These four fill the strip under the league name. Use an em dash to split a fact onto two lines.</p>
+    <div class="panel pad">
+      <div class="fields" style="margin-bottom:14px">
+        <div><label class="f" for="sDate">Draft date &amp; time — Mountain Time (drives the countdown)</label><input type="datetime-local" id="sDate"></div>
+        <div><label class="f" for="sLabel">Draft day, as displayed</label><input type="text" id="sLabel" placeholder="Sat, Sept 5 — Afternoon"></div>
+        <div><label class="f" for="sVenue">Where</label><input type="text" id="sVenue" placeholder="The Mayhaks — Family Dinner"></div>
+        <div><label class="f" for="sFee">Buy-in</label><input type="text" id="sFee" placeholder="TBD — vote below"></div>
+      </div>
+      <button class="btn sm" id="saveSettings">Save league facts</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">Data</span><h2>Backup &amp; restore</h2></div>
+    <p class="sub">All league data lives in this browser. Copy the JSON somewhere safe before you clear your browser, switch machines, or wire this up to a real database.</p>
+    <div class="grid2">
+      <div class="panel pad">
+        <h3 style="font-size:1.15rem;margin-bottom:12px">Export</h3>
+        <textarea id="exportBox" readonly aria-label="League data as JSON"></textarea>
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn sm" id="copyExport">Copy JSON</button>
+          <button class="btn sm ghost" id="downloadExport">Download file</button>
+        </div>
+      </div>
+      <div class="panel pad">
+        <h3 style="font-size:1.15rem;margin-bottom:12px">Import</h3>
+        <textarea id="importBox" placeholder="Paste exported league JSON here" aria-label="Paste league data to import"></textarea>
+        <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn sm" id="doImport">Replace data with this</button>
+          <span id="importMsg" style="font-size:.82rem;color:var(--muted)"></span>
+        </div>
+      </div>
+    </div>
+    <div class="panel pad danger" style="margin-top:14px">
+      <h3 style="font-size:1.15rem;margin-bottom:8px">Start over</h3>
+      <p style="margin:0 0 14px;color:#C4CFDC;font-size:.92rem">Wipes the roster, polls, votes, and league facts, then reloads the original ten names and two starting polls.</p>
+      <button class="btn sm ghost" id="resetAll">Reset everything</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">FamBam Fantasy Football &middot; commissioner tools &middot; <a href="index.html">back to the hub</a></div>
+</footer>
+
+<script src="fambam-data.js"></script>
+<script>
+(function(){
+  "use strict";
+  var DB = window.FamBam;
+
+  function debounce(fn, wait){
+    var t;
+    return function(){
+      var args = arguments, ctx = this;
+      clearTimeout(t);
+      t = setTimeout(function(){ fn.apply(ctx, args); }, wait);
+    };
+  }
+
+  var savedEl = document.getElementById('saved'), savedTimer;
+  function flashSaved(){
+    savedEl.textContent = 'Saved';
+    savedEl.style.color = '';
+    savedEl.classList.add('show');
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(function(){ savedEl.classList.remove('show'); }, 1400);
+  }
+  function flashError(msg){
+    savedEl.textContent = msg || 'Save failed — check your connection';
+    savedEl.style.color = '#E0533B';
+    savedEl.classList.add('show');
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(function(){ savedEl.classList.remove('show'); }, 3400);
+  }
+
+  /* ============ ROSTER ============ */
+  var mgrHost = document.getElementById('mgrHost');
+
+  async function saveBoard(rows){
+    try{ await DB.setBoard(rows); flashSaved(); }
+    catch(err){ flashError(err.message); console.error(err); }
+  }
+
+  function renderMgrs(){
+    var rows = DB.getBoard();
+    mgrHost.innerHTML = '';
+    rows.forEach(function(r,i){
+      var el = document.createElement('div');
+      el.className = 'mrow';
+      var n = String(i+1).padStart(2,'0');
+      el.innerHTML =
+        '<span class="slot">'+n+'</span>'+
+        '<input type="text" value="'+DB.esc(r.name)+'" placeholder="Open slot" aria-label="Name for slot '+n+'">'+
+        '<label class="toggle"><input type="checkbox"'+(r.signed?' checked':'')+' aria-label="Signed up, slot '+n+'"><span class="track"></span><span class="tlabel">Signed up</span></label>'+
+        '<label class="toggle pay"><input type="checkbox"'+(r.paid?' checked':'')+' aria-label="Paid, slot '+n+'"><span class="track"></span><span class="tlabel">Paid</span></label>'+
+        '<button class="x" title="Remove manager" aria-label="Remove '+DB.esc(r.name||('slot '+n))+'">&times;</button>';
+
+      var text = el.querySelector('input[type=text]');
+      text.addEventListener('input', debounce(function(){
+        var all = DB.getBoard(); all[i].name = text.value; saveBoard(all);
+      }, 500));
+      var boxes = el.querySelectorAll('input[type=checkbox]');
+      boxes[0].addEventListener('change', function(){ var all=DB.getBoard(); all[i].signed = boxes[0].checked; saveBoard(all); });
+      boxes[1].addEventListener('change', function(){ var all=DB.getBoard(); all[i].paid = boxes[1].checked; saveBoard(all); });
+      el.querySelector('.x').addEventListener('click', function(){
+        var all = DB.getBoard();
+        if(!confirm('Remove '+(all[i].name || 'this slot')+' from the board?')) return;
+        all.splice(i,1); saveBoard(all); renderMgrs();
+      });
+      mgrHost.appendChild(el);
+    });
+  }
+
+  document.getElementById('addMgr').addEventListener('click', function(){
+    var all = DB.getBoard();
+    all.push({name:'', signed:false, paid:false});
+    saveBoard(all); renderMgrs();
+    var inputs = mgrHost.querySelectorAll('input[type=text]');
+    inputs[inputs.length-1].focus();
+  });
+  document.getElementById('clearFlags').addEventListener('click', function(){
+    if(!confirm('Set every manager back to not signed up and not paid?')) return;
+    var all = DB.getBoard().map(function(r){ r.signed=false; r.paid=false; return r; });
+    saveBoard(all); renderMgrs();
+  });
+  document.getElementById('restoreNames').addEventListener('click', function(){
+    if(!confirm('Replace the current names with the original ten? Switch settings are kept where slots line up.')) return;
+    var cur = DB.getBoard();
+    var all = DB.defaults.names.map(function(n,i){
+      return { name:n, signed: cur[i] ? cur[i].signed : false, paid: cur[i] ? cur[i].paid : false };
+    });
+    saveBoard(all); renderMgrs();
+  });
+
+  /* ============ POLLS ============ */
+  var pollHost = document.getElementById('pollHost');
+
+  async function savePolls(polls){
+    try{ await DB.setPolls(polls); flashSaved(); }
+    catch(err){ flashError(err.message); console.error(err); }
+  }
+
+  function renderPolls(){
+    var polls = DB.getPolls();
+    pollHost.innerHTML = '';
+    if(!polls.length){
+      pollHost.innerHTML = '<div class="panel pad" style="margin-bottom:16px;color:#8C9AAC;font-size:.92rem">No polls yet. Add one and it appears on the league hub straight away.</div>';
+      return;
+    }
+    polls.forEach(function(p, pi){
+      var counts = DB.getCounts(p.id);
+      var total = p.options.reduce(function(s,o){ return s + (counts[o.id]||0); },0);
+      var el = document.createElement('div');
+      el.className = 'poll';
+
+      var optHTML = '';
+      p.options.forEach(function(o, oi){
+        optHTML += '<div class="orow" data-oi="'+oi+'">'+
+          '<input type="text" class="olabel" value="'+DB.esc(o.label)+'" placeholder="Option text" aria-label="Option text">'+
+          '<input type="number" class="ocount" min="0" value="'+(counts[o.id]||0)+'" aria-label="Votes for this option">'+
+          '<button class="x rmopt" title="Remove option" aria-label="Remove option">&times;</button>'+
+        '</div>';
+      });
+
+      el.innerHTML =
+        '<div class="pollhead"><h3 style="font-size:1.25rem">Poll</h3><span class="pid">id: '+DB.esc(p.id)+'</span><span class="spacer"></span></div>'+
+        '<div class="fields">'+
+          '<div><label class="f">Question</label><input type="text" class="ptitle" value="'+DB.esc(p.title)+'" placeholder="Entry fee"></div>'+
+          '<div><label class="f">Note under the question</label><input type="text" class="phint" value="'+DB.esc(p.hint||'')+'" placeholder="Optional context"></div>'+
+        '</div>'+
+        '<div class="ohead"><span>Options</span><span>Votes</span><span></span></div>'+
+        '<div class="opts">'+optHTML+'</div>'+
+        '<div class="pollfoot">'+
+          '<button class="btn sm ghost addopt">Add option</button>'+
+          '<button class="btn sm ghost resetvotes">Reset votes</button>'+
+          '<button class="btn sm ghost delpoll">Delete poll</button>'+
+          '<span class="total">'+total+' total</span>'+
+        '</div>';
+
+      el.querySelector('.ptitle').addEventListener('input', debounce(function(e){
+        var all = DB.getPolls(); all[pi].title = e.target.value; savePolls(all);
+      }, 500));
+      el.querySelector('.phint').addEventListener('input', debounce(function(e){
+        var all = DB.getPolls(); all[pi].hint = e.target.value; savePolls(all);
+      }, 500));
+
+      el.querySelectorAll('.orow').forEach(function(row){
+        var oi = parseInt(row.getAttribute('data-oi'),10);
+        row.querySelector('.olabel').addEventListener('input', debounce(function(e){
+          var all = DB.getPolls(); all[pi].options[oi].label = e.target.value; savePolls(all);
+        }, 500));
+        row.querySelector('.ocount').addEventListener('change', async function(e){
+          var v = Math.max(0, parseInt(e.target.value,10) || 0);
+          e.target.value = v;
+          var c = DB.getCounts(p.id); c[p.options[oi].id] = v;
+          try{ await DB.setCounts(p.id, c); flashSaved(); }
+          catch(err){ flashError(err.message); console.error(err); }
+          renderPolls();
+        });
+        row.querySelector('.rmopt').addEventListener('click', async function(){
+          var all = DB.getPolls();
+          if(all[pi].options.length <= 2){ alert('A poll needs at least two options.'); return; }
+          var removed = all[pi].options.splice(oi,1)[0];
+          var c = DB.getCounts(p.id); delete c[removed.id];
+          try{ await DB.setCounts(p.id, c); }catch(err){ console.error(err); }
+          savePolls(all); renderPolls();
+        });
+      });
+
+      el.querySelector('.addopt').addEventListener('click', function(){
+        var all = DB.getPolls();
+        var taken = all[pi].options.map(function(o){ return o.id; });
+        all[pi].options.push({ id: DB.uniqueId('option-'+(all[pi].options.length+1), taken), label:'' });
+        savePolls(all); renderPolls();
+      });
+      el.querySelector('.resetvotes').addEventListener('click', async function(){
+        if(!confirm('Throw away every vote on "'+(p.title||'this poll')+'"?')) return;
+        try{ await DB.clearPollData(p.id); flashSaved(); }
+        catch(err){ flashError(err.message); console.error(err); }
+        renderPolls();
+      });
+      el.querySelector('.delpoll').addEventListener('click', async function(){
+        if(!confirm('Delete "'+(p.title||'this poll')+'" and its votes? This can\u2019t be undone.')) return;
+        var all = DB.getPolls(); all.splice(pi,1);
+        try{ await DB.clearPollData(p.id); }catch(err){ console.error(err); }
+        savePolls(all); renderPolls();
+      });
+
+      pollHost.appendChild(el);
+    });
+  }
+
+  document.getElementById('addPoll').addEventListener('click', function(){
+    var title = prompt('What is the question?', '');
+    if(title === null) return;
+    title = title.trim();
+    if(!title){ alert('A poll needs a question.'); return; }
+    var all = DB.getPolls();
+    var taken = all.map(function(p){ return p.id; });
+    all.push({
+      id: DB.uniqueId(title, taken),
+      title: title,
+      hint: '',
+      options: [{id:'option-1',label:''},{id:'option-2',label:''}]
+    });
+    savePolls(all); renderPolls();
+    window.scrollTo({top: pollHost.lastChild.offsetTop - 80, behavior:'smooth'});
+  });
+
+  /* ============ LEAGUE FACTS ============ */
+  function fillSettingsForm(){
+    var s = DB.getSettings();
+    document.getElementById('sDate').value = s.draftISO || '';
+    document.getElementById('sLabel').value = s.draftLabel || '';
+    document.getElementById('sVenue').value = s.venue || '';
+    document.getElementById('sFee').value = s.entryFee || '';
+  }
+  document.getElementById('saveSettings').addEventListener('click', async function(){
+    try{
+      await DB.setSettings({
+        draftISO: document.getElementById('sDate').value,
+        draftLabel: document.getElementById('sLabel').value,
+        venue: document.getElementById('sVenue').value,
+        entryFee: document.getElementById('sFee').value
+      });
+      flashSaved();
+    }catch(err){ flashError(err.message); console.error(err); }
+  });
+
+  /* ============ DATA ============ */
+  function refreshExport(){
+    document.getElementById('exportBox').value = JSON.stringify(DB.exportAll(), null, 2);
+  }
+  document.getElementById('copyExport').addEventListener('click', function(){
+    var box = document.getElementById('exportBox');
+    box.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    if(navigator.clipboard) navigator.clipboard.writeText(box.value).catch(function(){});
+    flashSaved();
+  });
+  document.getElementById('downloadExport').addEventListener('click', function(){
+    var blob = new Blob([document.getElementById('exportBox').value], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'fambam-league-data.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  document.getElementById('doImport').addEventListener('click', async function(){
+    var msg = document.getElementById('importMsg');
+    var txt = document.getElementById('importBox').value.trim();
+    if(!txt){ msg.textContent = 'Paste some JSON first.'; return; }
+    var data;
+    try{ data = JSON.parse(txt); }
+    catch(e){ msg.textContent = 'That is not valid JSON — check for a missing bracket.'; return; }
+    if(!confirm('Replace all current league data with this import?')) return;
+    msg.textContent = 'Importing…';
+    try{
+      await DB.importAll(data);
+      msg.textContent = 'Imported.';
+      renderMgrs(); renderPolls(); refreshExport(); fillSettingsForm();
+    }catch(e){ msg.textContent = e.message; }
+  });
+  document.getElementById('resetAll').addEventListener('click', async function(){
+    if(!confirm('Reset the roster, polls, votes, and league facts to their starting values?')) return;
+    try{
+      await DB.resetEverything();
+      renderMgrs(); renderPolls(); refreshExport(); fillSettingsForm();
+      flashSaved();
+    }catch(err){ flashError(err.message); console.error(err); }
+  });
+
+  /* keep export box current */
+  var exportTimer;
+  ['input','change','click'].forEach(function(evt){
+    document.addEventListener(evt, function(){
+      clearTimeout(exportTimer);
+      exportTimer = setTimeout(refreshExport, 600);
+    });
+  });
+
+  (async function init(){
+    try{
+      await DB.load();
+    }catch(err){
+      mgrHost.innerHTML = '<div style="padding:20px;color:#E0533B;font-family:\'IBM Plex Mono\',monospace;font-size:.82rem">Could not reach the shared league data. Check the connection and reload the page.</div>';
+      console.error(err);
+      return;
+    }
+    if(DB.isArchived()){
+      document.getElementById('archiveBanner').style.display = '';
+    }
+    renderMgrs(); renderPolls(); fillSettingsForm(); refreshExport();
+  })();
+})();
+</script>
+</body>
+</html>
