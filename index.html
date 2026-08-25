@@ -158,8 +158,11 @@
 
   footer{border-top:1px solid var(--line);padding:38px 0 60px;color:var(--muted);font-size:.84rem}
   footer .wrap{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+  .footinfo{display:flex;flex-direction:column;gap:4px}
+  .footinfo strong{color:var(--chalk);font-weight:700}
 
   @media (max-width:820px){
+    .hero{padding-top:32px}
     .steps,.polls,.rulegrid,.rulegrid.two{grid-template-columns:1fr}
     .brow{grid-template-columns:40px 1fr 1fr;row-gap:10px;column-gap:10px}
     .brow .slot{grid-column:1;grid-row:1}
@@ -387,7 +390,10 @@
 
 <footer>
   <div class="wrap">
-    <span>FamBam Fantasy Football &middot; League 1410536 &middot; Draft: Sat, Sept 5</span>
+    <div class="footinfo">
+      <span>FamBam Fantasy Football &middot; <a href="https://football.fantasysports.yahoo.com/league/fambam_fantasy_football" target="_blank" rel="noopener">Yahoo! League 1410536</a></span>
+      <strong>Draft: Sat, Sept 5</strong>
+    </div>
     <span><a href="resources.html">Beginner resources &rarr;</a></span>
   </div>
 </footer>
