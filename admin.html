@@ -75,11 +75,24 @@
   label.f{display:block;font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
 
   /* roster */
-  .mrow{display:grid;grid-template-columns:40px 1fr 122px 104px 40px;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
+  .mrow{display:grid;grid-template-columns:70px 1fr 122px 104px 40px;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
   .mrow.head{background:var(--panel-2);padding:8px 16px}
   .mrow.head span{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
   .mrow:last-child{border-bottom:0}
   .slot{font-family:"IBM Plex Mono",monospace;font-size:.82rem;color:var(--orange)}
+
+  .rowlead{display:flex;align-items:center;gap:8px}
+  .draghandle{width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+    color:var(--muted);cursor:grab;touch-action:none;flex-shrink:0;user-select:none}
+  .draghandle:hover{color:var(--chalk)}
+  .draghandle:active{cursor:grabbing}
+  .draghandle .dots{width:3px;height:3px;border-radius:50%;background:currentColor;
+    box-shadow:0 -6px 0 currentColor,0 6px 0 currentColor,
+      6px -6px 0 currentColor,6px 0 0 currentColor,6px 6px 0 currentColor}
+  .mrow.drag-placeholder{background:rgba(251,79,20,.08);border:1px dashed rgba(251,79,20,.5)}
+  .mrow.drag-ghost{position:fixed;z-index:200;pointer-events:none;background:var(--panel-2);
+    border:1px solid var(--orange);box-shadow:0 12px 28px rgba(0,0,0,.55);opacity:.96}
+
   .toggle{display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
   .toggle input{position:absolute;opacity:0;width:0;height:0}
   .track{width:42px;height:23px;border-radius:999px;background:#22304A;border:1px solid var(--line-strong);position:relative;transition:background .18s ease}
@@ -123,7 +136,12 @@
   footer{border-top:1px solid var(--line);padding:34px 0 60px;color:var(--muted);font-size:.82rem;margin-top:30px}
 
   @media (max-width:760px){
-    .mrow{grid-template-columns:32px 1fr;row-gap:10px}
+    .mrow{grid-template-columns:44px 1fr 1fr;row-gap:10px;column-gap:10px}
+    .mrow .rowlead{grid-column:1;grid-row:1}
+    .mrow input[type=text]{grid-column:2 / span 2;grid-row:1}
+    .mrow .toggle:not(.pay){grid-column:2;grid-row:2}
+    .mrow .toggle.pay{grid-column:3;grid-row:2}
+    .mrow .x{grid-column:1;grid-row:2}
     .mrow.head{display:none}
     .fields,.grid2{grid-template-columns:1fr}
   }
@@ -220,7 +238,7 @@
 <section>
   <div class="wrap">
     <div class="shead"><span class="yard">Roster board</span><h2>Managers</h2></div>
-    <p class="sub">Names appear in this order on the hub. Flip a switch when someone joins the Yahoo league or hands over their buy-in.</p>
+    <p class="sub">Names appear in this order on the hub. Drag the grip handle to reorder, or flip a switch when someone joins the Yahoo league or hands over their buy-in.</p>
     <div class="panel">
       <div class="mrow head"><span>#</span><span>Name</span><span>Signed up</span><span>Paid</span><span></span></div>
       <div id="mgrHost"></div>
@@ -337,9 +355,10 @@
     rows.forEach(function(r,i){
       var el = document.createElement('div');
       el.className = 'mrow';
+      el._mgr = r; /* live reference back into the board array, used when a drag finishes */
       var n = String(i+1).padStart(2,'0');
       el.innerHTML =
-        '<span class="slot">'+n+'</span>'+
+        '<span class="rowlead"><span class="draghandle" title="Drag to reorder" aria-label="Drag to reorder '+DB.esc(r.name||('slot '+n))+'"><span class="dots"></span></span><span class="slot">'+n+'</span></span>'+
         '<input type="text" value="'+DB.esc(r.name)+'" placeholder="Open slot" aria-label="Name for slot '+n+'">'+
         '<label class="toggle"><input type="checkbox"'+(r.signed?' checked':'')+' aria-label="Signed up, slot '+n+'"><span class="track"></span><span class="tlabel">Signed up</span></label>'+
         '<label class="toggle pay"><input type="checkbox"'+(r.paid?' checked':'')+' aria-label="Paid, slot '+n+'"><span class="track"></span><span class="tlabel">Paid</span></label>'+
@@ -357,8 +376,90 @@
         if(!confirm('Remove '+(all[i].name || 'this slot')+' from the board?')) return;
         all.splice(i,1); saveBoard(all); renderMgrs();
       });
+      el.querySelector('.draghandle').addEventListener('pointerdown', function(e){
+        beginDrag(e, el);
+      });
       mgrHost.appendChild(el);
     });
+  }
+
+  /* ---- drag to reorder: a fixed-position ghost follows the pointer,
+     a dashed placeholder marks where the row would land, and on drop
+     the new order is read straight off the DOM and saved. ---- */
+  var dragState = null;
+
+  function beginDrag(e, rowEl){
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+
+    var rect = rowEl.getBoundingClientRect();
+    var ghost = rowEl.cloneNode(true);
+    ghost.classList.add('drag-ghost');
+    ghost.style.width = rect.width + 'px';
+    ghost.style.left = rect.left + 'px';
+    ghost.style.top = rect.top + 'px';
+    document.body.appendChild(ghost);
+
+    var placeholder = document.createElement('div');
+    placeholder.className = 'mrow drag-placeholder';
+    placeholder.style.height = rect.height + 'px';
+    mgrHost.insertBefore(placeholder, rowEl);
+    rowEl.style.display = 'none';
+
+    dragState = {
+      ghost: ghost,
+      placeholder: placeholder,
+      realRow: rowEl,
+      offsetY: e.clientY - rect.top,
+      pointerId: e.pointerId
+    };
+
+    document.addEventListener('pointermove', onDragMove);
+    document.addEventListener('pointerup', endDrag);
+    document.addEventListener('pointercancel', endDrag);
+  }
+
+  function onDragMove(e){
+    if(!dragState) return;
+    e.preventDefault();
+    dragState.ghost.style.top = (e.clientY - dragState.offsetY) + 'px';
+
+    var siblings = Array.prototype.slice.call(mgrHost.children).filter(function(el){
+      return el !== dragState.placeholder && el !== dragState.realRow;
+    });
+    var ghostRect = dragState.ghost.getBoundingClientRect();
+    var ghostMid = ghostRect.top + ghostRect.height / 2;
+
+    for(var i=0;i<siblings.length;i++){
+      var r = siblings[i].getBoundingClientRect();
+      if(ghostMid < r.top + r.height / 2){
+        mgrHost.insertBefore(dragState.placeholder, siblings[i]);
+        return;
+      }
+    }
+    mgrHost.appendChild(dragState.placeholder);
+  }
+
+  function endDrag(){
+    if(!dragState) return;
+    document.removeEventListener('pointermove', onDragMove);
+    document.removeEventListener('pointerup', endDrag);
+    document.removeEventListener('pointercancel', endDrag);
+
+    var newOrder = [];
+    Array.prototype.slice.call(mgrHost.children).forEach(function(el){
+      if(el === dragState.realRow) return;
+      if(el === dragState.placeholder){ newOrder.push(dragState.realRow._mgr); return; }
+      if(el._mgr) newOrder.push(el._mgr);
+    });
+
+    dragState.ghost.remove();
+    dragState.placeholder.remove();
+    dragState.realRow.style.display = '';
+    dragState = null;
+
+    saveBoard(newOrder);
+    renderMgrs();
   }
 
   document.getElementById('addMgr').addEventListener('click', function(){
