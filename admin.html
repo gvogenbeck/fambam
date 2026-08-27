@@ -345,8 +345,8 @@
   var mgrHost = document.getElementById('mgrHost');
 
   async function saveBoard(rows){
-    try{ await DB.setBoard(rows); flashSaved(); }
-    catch(err){ flashError(err.message); console.error(err); }
+    try{ await DB.setBoard(rows); flashSaved(); return true; }
+    catch(err){ flashError(err.message); console.error(err); return false; }
   }
 
   function renderMgrs(){
@@ -366,15 +366,15 @@
 
       var text = el.querySelector('input[type=text]');
       text.addEventListener('input', debounce(function(){
-        var all = DB.getBoard(); all[i].name = text.value; saveBoard(all);
+        r.name = text.value; saveBoard(DB.getBoard());
       }, 500));
       var boxes = el.querySelectorAll('input[type=checkbox]');
-      boxes[0].addEventListener('change', function(){ var all=DB.getBoard(); all[i].signed = boxes[0].checked; saveBoard(all); });
-      boxes[1].addEventListener('change', function(){ var all=DB.getBoard(); all[i].paid = boxes[1].checked; saveBoard(all); });
-      el.querySelector('.x').addEventListener('click', function(){
-        var all = DB.getBoard();
-        if(!confirm('Remove '+(all[i].name || 'this slot')+' from the board?')) return;
-        all.splice(i,1); saveBoard(all); renderMgrs();
+      boxes[0].addEventListener('change', function(){ r.signed = boxes[0].checked; saveBoard(DB.getBoard()); });
+      boxes[1].addEventListener('change', function(){ r.paid = boxes[1].checked; saveBoard(DB.getBoard()); });
+      el.querySelector('.x').addEventListener('click', async function(){
+        if(!confirm('Remove '+(r.name || 'this slot')+' from the board?')) return;
+        var all = DB.getBoard().filter(function(row){ return row !== r; });
+        await saveBoard(all); renderMgrs();
       });
       el.querySelector('.draghandle').addEventListener('pointerdown', function(e){
         beginDrag(e, el);
@@ -440,47 +440,52 @@
     mgrHost.appendChild(dragState.placeholder);
   }
 
-  function endDrag(){
+  async function endDrag(){
     if(!dragState) return;
+    var state = dragState;
+    dragState = null; /* clear first so a stray pointerup can't re-enter */
+
     document.removeEventListener('pointermove', onDragMove);
     document.removeEventListener('pointerup', endDrag);
     document.removeEventListener('pointercancel', endDrag);
 
     var newOrder = [];
     Array.prototype.slice.call(mgrHost.children).forEach(function(el){
-      if(el === dragState.realRow) return;
-      if(el === dragState.placeholder){ newOrder.push(dragState.realRow._mgr); return; }
+      if(el === state.realRow) return;
+      if(el === state.placeholder){ newOrder.push(state.realRow._mgr); return; }
       if(el._mgr) newOrder.push(el._mgr);
     });
 
-    dragState.ghost.remove();
-    dragState.placeholder.remove();
-    dragState.realRow.style.display = '';
-    dragState = null;
+    state.ghost.remove();
+    state.placeholder.remove();
+    state.realRow.style.display = '';
 
-    saveBoard(newOrder);
+    /* Wait for the write to land before re-rendering. DB.setBoard only
+       updates the shared cache once the server confirms, so rendering
+       early would paint the old order and desync the UI from the data. */
+    await saveBoard(newOrder);
     renderMgrs();
   }
 
-  document.getElementById('addMgr').addEventListener('click', function(){
-    var all = DB.getBoard();
+  document.getElementById('addMgr').addEventListener('click', async function(){
+    var all = DB.getBoard().slice();
     all.push({name:'', signed:false, paid:false});
-    saveBoard(all); renderMgrs();
+    await saveBoard(all); renderMgrs();
     var inputs = mgrHost.querySelectorAll('input[type=text]');
-    inputs[inputs.length-1].focus();
+    if(inputs.length) inputs[inputs.length-1].focus();
   });
-  document.getElementById('clearFlags').addEventListener('click', function(){
+  document.getElementById('clearFlags').addEventListener('click', async function(){
     if(!confirm('Set every manager back to not signed up and not paid?')) return;
-    var all = DB.getBoard().map(function(r){ r.signed=false; r.paid=false; return r; });
-    saveBoard(all); renderMgrs();
+    var all = DB.getBoard().map(function(r){ return { name:r.name, signed:false, paid:false }; });
+    await saveBoard(all); renderMgrs();
   });
-  document.getElementById('restoreNames').addEventListener('click', function(){
+  document.getElementById('restoreNames').addEventListener('click', async function(){
     if(!confirm('Replace the current names with the original ten? Switch settings are kept where slots line up.')) return;
     var cur = DB.getBoard();
     var all = DB.defaults.names.map(function(n,i){
       return { name:n, signed: cur[i] ? cur[i].signed : false, paid: cur[i] ? cur[i].paid : false };
     });
-    saveBoard(all); renderMgrs();
+    await saveBoard(all); renderMgrs();
   });
 
   /* ============ POLLS ============ */
