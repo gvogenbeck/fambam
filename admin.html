@@ -266,13 +266,15 @@
 <section>
   <div class="wrap">
     <div class="shead"><span class="yard">Hero</span><h2>League facts</h2></div>
-    <p class="sub">These four fill the strip under the league name. Use an em dash to split a fact onto two lines.</p>
+    <p class="sub">These fill the strip under the league name. Use an em dash (—) to split a fact onto two lines.</p>
     <div class="panel pad">
       <div class="fields" style="margin-bottom:14px">
         <div><label class="f" for="sDate">Draft date &amp; time — Mountain Time (drives the countdown)</label><input type="datetime-local" id="sDate"></div>
         <div><label class="f" for="sLabel">Draft day, as displayed</label><input type="text" id="sLabel" placeholder="Sat, Sept 5 — Afternoon"></div>
         <div><label class="f" for="sVenue">Where</label><input type="text" id="sVenue" placeholder="The Mayhaks — Family Dinner"></div>
-        <div><label class="f" for="sFee">Buy-in</label><input type="text" id="sFee" placeholder="TBD — vote below"></div>
+        <div><label class="f" for="sFee">Buy-in</label><input type="text" id="sFee" placeholder="$10"></div>
+        <div><label class="f" for="sPayout">Payout</label><input type="text" id="sPayout" placeholder="$100 — Winner takes all"></div>
+        <div><label class="f" for="sScoring">Scoring</label><input type="text" id="sScoring" placeholder="0.5 PPR"></div>
       </div>
       <button class="btn sm" id="saveSettings">Save league facts</button>
     </div>
@@ -626,6 +628,10 @@
     document.getElementById('sLabel').value = s.draftLabel || '';
     document.getElementById('sVenue').value = s.venue || '';
     document.getElementById('sFee').value = s.entryFee || '';
+    /* prefill what the hub currently falls back to, so saving without
+       touching these doesn't blank them out */
+    document.getElementById('sPayout').value = s.payout || '$100 — Winner takes all';
+    document.getElementById('sScoring').value = s.scoring || '0.5 PPR';
   }
   document.getElementById('saveSettings').addEventListener('click', async function(){
     try{
@@ -633,7 +639,9 @@
         draftISO: document.getElementById('sDate').value,
         draftLabel: document.getElementById('sLabel').value,
         venue: document.getElementById('sVenue').value,
-        entryFee: document.getElementById('sFee').value
+        entryFee: document.getElementById('sFee').value,
+        payout: document.getElementById('sPayout').value,
+        scoring: document.getElementById('sScoring').value
       });
       flashSaved();
     }catch(err){ flashError(err.message); console.error(err); }
