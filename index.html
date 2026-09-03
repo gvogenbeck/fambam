@@ -62,7 +62,8 @@
   .hero h1{font-size:clamp(3.2rem,11vw,7.4rem);line-height:.84;letter-spacing:-.01em}
   .hero h1 .line2{display:block;color:transparent;-webkit-text-stroke:2px var(--orange)}
   .hero p.lede{max-width:52ch;margin:22px 0 0;font-size:1.06rem;color:#C9D4E1}
-  .alert{margin:26px 0 0;max-width:62ch;background:linear-gradient(180deg,rgba(251,79,20,.13),rgba(251,79,20,.05));
+  .herogrid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin:26px 0 0;align-items:stretch}
+  .alert{background:linear-gradient(180deg,rgba(251,79,20,.13),rgba(251,79,20,.05));
     border:1px solid rgba(251,79,20,.42);border-left:4px solid var(--orange);padding:20px 24px}
   .alert-kicker{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;
     color:var(--orange);margin:0 0 10px}
@@ -72,12 +73,24 @@
   .alert-second{margin:12px 0 0;font-size:.95rem;color:#C0CCDA}
   .alert a{color:var(--orange-soft);text-decoration:none;border-bottom:1px solid rgba(255,138,85,.45)}
   .alert a:hover{color:#fff;border-bottom-color:#fff}
+
+  .discord{display:flex;flex-direction:column;align-items:flex-start;
+    background:linear-gradient(180deg,rgba(88,101,242,.16),rgba(88,101,242,.05));
+    border:1px solid rgba(88,101,242,.45);border-left:4px solid #5865F2;padding:20px 24px}
+  .discord-kicker{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.22em;
+    text-transform:uppercase;color:#93A0F5;margin:0 0 10px}
+  .discord h3{font-family:"Barlow Condensed",sans-serif;font-weight:800;text-transform:uppercase;
+    letter-spacing:.02em;font-size:1.42rem;color:#fff;margin:0 0 6px}
+  .discord p{margin:0;font-size:.95rem;color:#C0CCDA}
+  .discord .btn.ghost{margin-top:18px;border-color:rgba(88,101,242,.6);color:#C3C9FA}
+  .discord .btn.ghost:hover{border-color:#5865F2;background:#5865F2;color:#fff}
   .facts{display:flex;flex-wrap:wrap;gap:0;margin:34px 0 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   .fact{flex:1 1 170px;padding:16px 20px 18px;border-right:1px solid var(--line)}
   .fact:last-child{border-right:0}
   .fact .k{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
   .fact .v{font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;font-size:1.32rem;line-height:1.15;margin-top:5px}
   .fact .v.hot{color:var(--orange)}
+  .fact .v.big{font-size:2.55rem;line-height:1;margin-top:2px}
 
   .clock{display:flex;gap:10px;margin-top:12px;align-items:flex-end;flex-wrap:wrap}
   .clock-title{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:var(--orange);margin:30px 0 0}
@@ -163,6 +176,7 @@
 
   @media (max-width:820px){
     .hero{padding-top:32px}
+    .herogrid{grid-template-columns:1fr}
     .steps,.polls,.rulegrid,.rulegrid.two{grid-template-columns:1fr}
     .brow{grid-template-columns:40px 1fr 1fr;row-gap:10px;column-gap:10px}
     .brow .slot{grid-column:1;grid-row:1}
@@ -190,6 +204,7 @@
       <a href="#roster">Who's in</a>
       <a href="#rules">Rules</a>
       <a href="resources.html">Resources</a>
+      <a href="https://discord.gg/REPLACE-ME" target="_blank" rel="noopener">Discord</a>
       <a href="https://football.fantasysports.yahoo.com/league/fambam_fantasy_football" target="_blank" rel="noopener" class="cta">Go to League</a>
     </nav>
   </div>
@@ -211,19 +226,27 @@
 
 <header class="hero">
   <div class="wrap">
-    <p class="eyebrow" id="factTeaser">Saturday, September 5 &middot; Live In-Person Draft &middot; Buy-in TBD (vote below!)</p>
+    <p class="eyebrow" id="factTeaser">Saturday, September 5 &middot; Live In-Person Draft &middot; $10 Buy-in</p>
     <h1>FamBam<span class="line2">Fantasy</span>Football</h1>
-    <div class="alert">
-      <p class="alert-kicker">First things first!</p>
-      <p class="alert-main"><strong>Set up your Yahoo account and join the league now.</strong> Then vote in the polls below. Entry fee and playoff format get locked by draft day. <a href="https://football.fantasysports.yahoo.com/league/fambam_fantasy_football" target="_blank" rel="noopener">Jump straight to the league &rarr;</a></p>
+    <div class="herogrid">
+      <div class="alert">
+        <p class="alert-kicker">First things first!</p>
+        <p class="alert-main"><strong>Set up your Yahoo account and join the league now.</strong> Then vote in the polls below. Entry fee and playoff format get locked by draft day. <a href="https://football.fantasysports.yahoo.com/league/fambam_fantasy_football" target="_blank" rel="noopener">Jump straight to the league &rarr;</a></p>
+      </div>
+      <div class="discord">
+        <p class="discord-kicker">Talk trash somewhere</p>
+        <h3>Join the league Discord</h3>
+        <p>Trades, waiver-wire gloating, and draft-day logistics all live here. Get in before the draft so you don't miss anything.</p>
+        <a class="btn ghost" href="https://discord.gg/REPLACE-ME" target="_blank" rel="noopener">Open Discord invite</a>
+      </div>
     </div>
     <div class="callout">New to fantasy football? Swing by the <a href="resources.html">Resources page</a> for beginner-friendly rankings, tools, and a draft-day checklist.</div>
 
     <div class="facts">
       <div class="fact"><div class="k">Draft day</div><div class="v" id="factDate">Sat, Sept 5<br>Afternoon</div></div>
       <div class="fact"><div class="k">Where</div><div class="v" id="factWhere">The Mayhaks<br>Family Dinner</div></div>
-      <div class="fact"><div class="k">Buy-in</div><div class="v hot" id="factFee">TBD — vote below</div></div>
-      <div class="fact"><div class="k">Payout</div><div class="v hot">TBD — vote below</div></div>
+      <div class="fact"><div class="k">Buy-in</div><div class="v hot big" id="factFee">$10</div></div>
+      <div class="fact"><div class="k">Payout</div><div class="v hot">$100<br>Winner takes all</div></div>
       <div class="fact"><div class="k">Scoring</div><div class="v hot">0.5 PPR</div></div>
     </div>
 
@@ -417,7 +440,12 @@
     var settings = DB.getSettings();
     document.getElementById('factDate').innerHTML = DB.esc(settings.draftLabel||'').replace(' — ','<br>');
     document.getElementById('factWhere').innerHTML = DB.esc(settings.venue||'').replace(' — ','<br>');
-    document.getElementById('factFee').textContent = settings.entryFee || 'TBD';
+    var feeEl = document.getElementById('factFee');
+    var fee = settings.entryFee || 'TBD';
+    feeEl.textContent = fee;
+    /* the oversized treatment only suits a short figure like "$10" —
+       a longer value would blow out the row, so size it down */
+    feeEl.classList.toggle('big', fee.length <= 10);
   }
 
   var host = document.getElementById('pollHost');
