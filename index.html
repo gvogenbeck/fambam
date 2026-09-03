@@ -136,6 +136,20 @@
   .opt[aria-pressed="true"] .pct{color:var(--orange)}
   .tallynote{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;color:var(--muted);margin-top:14px}
 
+  .archtoggle{display:flex;align-items:center;gap:10px;width:100%;margin-top:22px;
+    background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer;
+    font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+    padding:13px 16px;text-align:left}
+  .archtoggle:hover{color:var(--chalk);border-color:var(--line-strong)}
+  .archtoggle .chev{display:inline-block;font-size:1.1rem;line-height:1;transition:transform .18s ease}
+  .archtoggle[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .archtoggle .archcount{margin-left:auto;border:1px solid var(--line-strong);padding:2px 8px;font-size:.62rem}
+  #archivedHost{margin-top:16px}
+  .card.closed{opacity:.78}
+  .card.closed .opt{cursor:default}
+  .closedtag{font-family:"IBM Plex Mono",monospace;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
+    border:1px solid var(--line-strong);color:var(--muted);padding:3px 8px;margin-left:10px;vertical-align:middle}
+
   .board{border:1px solid var(--line);background:var(--panel)}
   .brow{display:grid;grid-template-columns:46px 1fr 130px 110px;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
   .brow.head{background:var(--panel-2);border-bottom:1px solid var(--line-strong);padding:9px 16px}
@@ -289,7 +303,14 @@
   <div class="wrap">
     <div class="shead"><span class="yard">League vote</span><h2>Manager Preference Polls</h2></div>
     <p class="sub">Pick one answer per question. Results are advisory — the commissioner has final say.</p>
+    <p class="tallynote" id="frozenNote" hidden style="margin-bottom:18px">This site is archived — voting is closed and these results are final.</p>
     <div class="polls" id="pollHost"></div>
+    <div id="archivedWrap" hidden>
+      <button class="archtoggle" id="archToggle" aria-expanded="false" aria-controls="archivedHost">
+        <span class="chev">&rsaquo;</span> Archived polls <span class="archcount" id="archCount">0</span>
+      </button>
+      <div class="polls" id="archivedHost" hidden></div>
+    </div>
   </div>
 </section>
 
@@ -449,45 +470,65 @@
   }
 
   var host = document.getElementById('pollHost');
+  var archWrap = document.getElementById('archivedWrap');
+  var archHost = document.getElementById('archivedHost');
+  var archCount = document.getElementById('archCount');
+  var archToggle = document.getElementById('archToggle');
+  var frozenNote = document.getElementById('frozenNote');
+
+  archToggle.addEventListener('click', function(){
+    var open = archToggle.getAttribute('aria-expanded') === 'true';
+    archToggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+    archHost.hidden = open;
+  });
+
+  function pollCard(p, readOnly){
+    var counts = DB.getCounts(p.id), mine = DB.getMyVote(p.id);
+    var total = p.options.reduce(function(s,o){ return s + (counts[o.id]||0); },0);
+    var card = document.createElement('div');
+    card.className = 'card' + (readOnly ? ' closed' : '');
+    var html = '<h3>'+DB.esc(p.title)+(p.archived ? '<span class="closedtag">Closed</span>' : '')+'</h3>';
+    if(p.hint) html += '<p class="hint">'+DB.esc(p.hint)+'</p>';
+    p.options.forEach(function(o){
+      var n = counts[o.id]||0, pct = total ? Math.round(n/total*100) : 0;
+      var tag = readOnly ? 'div' : 'button';
+      html += '<'+tag+' class="opt"'+
+        (readOnly ? '' : ' data-poll="'+DB.esc(p.id)+'" data-choice="'+DB.esc(o.id)+'"')+
+        ' aria-pressed="'+(mine===o.id)+'">'+
+        '<span class="bar" style="width:'+pct+'%"></span>'+
+        '<span class="txt"><span>'+DB.esc(o.label)+'</span>'+
+        '<span class="pct">'+(total ? pct+'% · '+n : '—')+'</span></span></'+tag+'>';
+    });
+    html += '<p class="tallynote">'+(total===1 ? '1 vote' : total+' votes')+'</p>';
+    card.innerHTML = html;
+    return card;
+  }
+
   function renderPolls(){
     var polls = DB.getPolls();
-    var archived = DB.isArchived();
+    var frozen = DB.isArchived();
+    frozenNote.hidden = !frozen;
+
+    var active = [], archived = [];
+    polls.forEach(function(p){ (p.archived ? archived : active).push(p); });
+
     host.innerHTML = '';
-    if(!polls.length){
+    archHost.innerHTML = '';
+
+    if(!active.length){
       host.innerHTML = '<div class="card"><h3>No open votes</h3><p class="hint">Nothing to decide right now. Check back before the draft.</p></div>';
-      return;
+    } else {
+      active.forEach(function(p){ host.appendChild(pollCard(p, frozen)); });
     }
-    if(archived){
-      var note = document.createElement('p');
-      note.className = 'tallynote';
-      note.style.marginBottom = '18px';
-      note.textContent = 'This site is archived — voting is closed and these results are final.';
-      host.parentNode.insertBefore(note, host);
-    }
-    polls.forEach(function(p){
-      var counts = DB.getCounts(p.id), mine = DB.getMyVote(p.id);
-      var total = p.options.reduce(function(s,o){ return s + (counts[o.id]||0); },0);
-      var card = document.createElement('div');
-      card.className = 'card';
-      var html = '<h3>'+DB.esc(p.title)+'</h3>';
-      if(p.hint) html += '<p class="hint">'+DB.esc(p.hint)+'</p>';
-      p.options.forEach(function(o){
-        var n = counts[o.id]||0, pct = total ? Math.round(n/total*100) : 0;
-        var tag = archived ? 'div' : 'button';
-        html += '<'+tag+' class="opt"'+(archived?' style="cursor:default"':' data-poll="'+DB.esc(p.id)+'" data-choice="'+DB.esc(o.id)+'"')+' aria-pressed="'+(mine===o.id)+'">'+
-          '<span class="bar" style="width:'+pct+'%"></span>'+
-          '<span class="txt"><span>'+DB.esc(o.label)+'</span>'+
-          '<span class="pct">'+(total ? pct+'% · '+n : '—')+'</span></span></'+tag+'>';
-      });
-      html += '<p class="tallynote">'+(total===1 ? '1 vote' : total+' votes')+'</p>';
-      card.innerHTML = html;
-      host.appendChild(card);
-    });
+
+    archived.forEach(function(p){ archHost.appendChild(pollCard(p, true)); });
+    archWrap.hidden = archived.length === 0;
+    archCount.textContent = archived.length;
   }
   host.addEventListener('click', async function(e){
     if(DB.isArchived()) return;
     var btn = e.target.closest('.opt');
-    if(!btn) return;
+    if(!btn || !btn.getAttribute('data-poll')) return;
     btn.disabled = true;
     try{
       await DB.castVote(btn.getAttribute('data-poll'), btn.getAttribute('data-choice'));

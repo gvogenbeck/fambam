@@ -1,4 +1,4 @@
-const { redis, countsKey, votersKey, normalizeCounts, readJsonBody, blockIfArchived } = require('./_lib');
+const { redis, getJSON, countsKey, votersKey, normalizeCounts, readJsonBody, blockIfArchived } = require('./_lib');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'POST') return res.status(405).json({ error:'POST only' });
@@ -11,6 +11,14 @@ module.exports = async function handler(req, res){
   }
 
   try{
+    /* An archived poll is kept for the record but closed to voting.
+       Enforce that here so it holds even against a direct API call. */
+    const polls = await getJSON('polls', []);
+    const poll = polls.find(function(p){ return p.id === pollId; });
+    if(poll && poll.archived){
+      return res.status(403).json({ error:'This poll is archived and no longer accepting votes.' });
+    }
+
     const cKey = countsKey(pollId), vKey = votersKey(pollId);
     const prevChoice = await redis.hget(vKey, voterId);
 
