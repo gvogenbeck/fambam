@@ -1,4 +1,4 @@
-const { redis, getJSON, countsKey, votersKey, normalizeCounts, readJsonBody, blockIfArchived } = require('./_lib');
+const { redis, getJSON, countsKey, votersKey, normalizeCounts, readJsonBody, blockIfArchived } = require('../lib/store');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'POST') return res.status(405).json({ error:'POST only' });

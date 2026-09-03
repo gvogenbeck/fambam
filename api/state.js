@@ -1,5 +1,5 @@
 const { redis, getJSON, setJSON, countsKey, normalizeCounts,
-        DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard, isArchived } = require('./_lib');
+        DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard, isArchived } = require('../lib/store');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'GET') return res.status(405).json({ error:'GET only' });

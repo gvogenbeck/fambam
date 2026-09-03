@@ -1,5 +1,5 @@
 const { redis, getJSON, setJSON, countsKey, votersKey,
-        DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard, blockIfArchived } = require('./_lib');
+        DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard, blockIfArchived } = require('../lib/store');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'POST') return res.status(405).json({ error:'POST only' });

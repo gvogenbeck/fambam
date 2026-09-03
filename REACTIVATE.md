@@ -37,12 +37,12 @@ Good if it's the same ten people again. In `admin.html`:
 
 **B. Start completely clean.** Click **Reset everything** in
 `admin.html`. This wipes the roster, all polls and their votes, and
-league facts back to the *hardcoded defaults* in `api/_lib.js` (the
+league facts back to the *hardcoded defaults* in `lib/store.js` (the
 original ten names, the four original polls, the original draft
 date). If you want the reset button to seed *different* defaults next
 year — a new set of names, new poll questions, a new draft date —
 edit the `DEFAULT_NAMES`, `DEFAULT_POLLS`, and `DEFAULT_SETTINGS`
-constants near the top of `api/_lib.js` before you redeploy, then hit
+constants near the top of `lib/store.js` before you redeploy, then hit
 reset. That file is the single source of truth both the reset button
 and a brand-new (never-visited) deployment fall back to.
 

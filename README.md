@@ -6,7 +6,7 @@ edit. Here's how to get it live.
 
 ## 1. Push to GitHub
 
-Put this whole `fambam` folder (including `api/`, `package.json`, and
+Put this whole `fambam` folder (including `api/`, `lib/`, `package.json`, and
 `fambam-data.js`) in a GitHub repo.
 
 ## 2. Import into Vercel
@@ -42,6 +42,11 @@ HTTPS is automatic.
 
 ## How the data flows
 
+- Shared backend code lives in `lib/store.js`, **not** inside `api/`.
+  Vercel scans `api/` to decide what becomes a Serverless Function and
+  drops underscore-prefixed files from the deployed bundle, so a helper
+  at `api/_lib.js` works locally but fails in production with
+  "Cannot find module". Keep shared modules in `lib/`.
 - `fambam-data.js` is the only file that talks to the API. Every page
   calls `DB.load()` once, then reads from an in-memory cache; every
   edit writes through to the server first.
