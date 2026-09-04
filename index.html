@@ -41,7 +41,7 @@
   .topnav a.cta{color:var(--orange);border:1px solid rgba(251,79,20,.5);padding:6px 12px;font-weight:600}
   .topnav a.cta:hover,.topnav a.cta:focus-visible{color:#0A0A0A;background:var(--orange);border-color:var(--orange)}
   .topnav a.discordnav{display:flex;align-items:center;padding:0;line-height:0}
-  .discordnav img{display:block;height:18px;width:auto;opacity:.85;transition:opacity .15s ease}
+  .discordnav img{display:block;height:26px;width:auto;opacity:.85;transition:opacity .15s ease}
   .discordnav:hover img,.discordnav:focus-visible img{opacity:1}
 
   .navtoggle{display:none;margin-left:auto;background:none;border:1px solid var(--line-strong);
@@ -87,7 +87,8 @@
     letter-spacing:.02em;font-size:1.42rem;color:#fff;margin:0 0 6px}
   .discord p{margin:0;font-size:.95rem;color:#C0CCDA}
   .discord-cta{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
-  .discord-mark{display:block;width:40px;height:40px;flex-shrink:0}
+  /* 50px ≈ the ghost button's height (1.02rem text × 1.6 line-height + 24px padding + borders) */
+  .discord-mark{display:block;width:50px;height:50px;flex-shrink:0}
   .discord .btn.ghost{margin-top:0;border-color:rgba(88,101,242,.6);color:#C3C9FA}
   .discord .btn.ghost:hover{border-color:#5865F2;background:#5865F2;color:#fff}
   .facts{display:flex;flex-wrap:wrap;gap:0;margin:34px 0 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -225,7 +226,7 @@
       <a href="#rules">Rules</a>
       <a href="resources.html">Resources</a>
       <a href="https://discord.gg/REPLACE-ME" target="_blank" rel="noopener" class="discordnav" aria-label="Join the league Discord">
-        <img src="assets/discord-lockup.svg" alt="Discord" width="66" height="18">
+        <img src="assets/discord-lockup.svg" alt="Discord" width="95" height="26">
       </a>
       <a href="https://football.fantasysports.yahoo.com/league/fambam_fantasy_football" target="_blank" rel="noopener" class="cta">Go to League</a>
     </nav>
@@ -260,7 +261,7 @@
         <h3>Join the league Discord</h3>
         <p>Trades, waiver-wire gloating, and draft-day logistics all live here. Get in before the draft so you don't miss anything.</p>
         <div class="discord-cta">
-          <img class="discord-mark" src="assets/discord-mark.svg" alt="" width="40" height="40" aria-hidden="true">
+          <img class="discord-mark" src="assets/discord-mark.svg" alt="" width="50" height="50" aria-hidden="true">
           <a class="btn ghost" href="https://discord.gg/REPLACE-ME" target="_blank" rel="noopener">Open Discord invite</a>
         </div>
       </div>
