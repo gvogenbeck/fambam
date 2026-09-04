@@ -1,4 +1,4 @@
-const { redis, getJSON, countsKey, votersKey, normalizeCounts, readJsonBody, blockIfArchived } = require('../lib/store');
+const { redis, getJSON, countsKey, votersKey, readJsonBody, blockIfArchived, syncCountsCache } = require('../lib/store');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'POST') return res.status(405).json({ error:'POST only' });
@@ -37,8 +37,8 @@ module.exports = async function handler(req, res){
       await redis.hset(vKey, { [voterId]: optionId });
     }
 
-    const raw = await redis.hgetall(cKey);
-    res.status(200).json({ counts: normalizeCounts(raw) });
+    const counts = await syncCountsCache(pollId);
+    res.status(200).json({ counts: counts });
   }catch(err){
     res.status(500).json({ error: String((err && err.message) || err) });
   }

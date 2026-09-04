@@ -1,4 +1,4 @@
-const { redis, countsKey, votersKey, readJsonBody, blockIfArchived } = require('../lib/store');
+const { redis, countsKey, votersKey, readJsonBody, blockIfArchived, writeCountsCache, clearCountsCache } = require('../lib/store');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'POST') return res.status(405).json({ error:'POST only' });
@@ -18,16 +18,18 @@ module.exports = async function handler(req, res){
       }
       await redis.del(cKey);
       const fields = Object.keys(counts);
+      const payload = {};
       if(fields.length){
-        const payload = {};
         fields.forEach(function(k){ payload[k] = Math.max(0, Number(counts[k]) || 0); });
         await redis.hset(cKey, payload);
       }
+      await writeCountsCache(pollId, payload);
       return res.status(200).json({ ok:true });
     }
 
     if(action === 'clearVotes'){
       await Promise.all([ redis.del(cKey), redis.del(vKey) ]);
+      await writeCountsCache(pollId, {});
       return res.status(200).json({ ok:true });
     }
 

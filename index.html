@@ -627,11 +627,36 @@
     tickClock();
     setInterval(tickClock, 30000);
     if(DB.isArchived()) return; /* frozen data won't change — no need to keep polling */
-    /* light polling so votes and roster changes from other visitors
-       show up without anyone having to refresh */
-    setInterval(async function(){
-      try{ await DB.refresh(); renderAll(); }catch(e){ console.error(e); }
-    }, 20000);
+
+    /* Background polling so votes and roster changes from other
+       visitors show up without anyone refreshing — but only while the
+       tab is actually visible. A tab left open in the background has
+       no one looking at it, so there's nothing to gain from polling it,
+       and every browser exposes document.hidden for exactly this. This
+       matters more than it sounds: at the old 20s/always-on rate, one
+       forgotten tab alone could burn through Upstash's whole free-tier
+       daily quota and take the site down for everyone. */
+    var poller = null;
+    function startPolling(){
+      if(poller) return;
+      poller = setInterval(async function(){
+        try{ await DB.refresh(); renderAll(); }catch(e){ console.error(e); }
+      }, 60000);
+    }
+    function stopPolling(){
+      if(!poller) return;
+      clearInterval(poller);
+      poller = null;
+    }
+    document.addEventListener('visibilitychange', function(){
+      if(document.hidden){ stopPolling(); }
+      else {
+        /* catch up immediately on return, then resume the interval */
+        DB.refresh().then(renderAll).catch(function(e){ console.error(e); });
+        startPolling();
+      }
+    });
+    if(!document.hidden) startPolling();
   })();
 })();
 </script>

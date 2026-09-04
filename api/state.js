@@ -1,4 +1,4 @@
-const { redis, getJSON, setJSON, countsKey, normalizeCounts,
+const { getJSON, setJSON, getCountsForPolls,
         DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard, isArchived } = require('../lib/store');
 
 module.exports = async function handler(req, res){
@@ -14,11 +14,7 @@ module.exports = async function handler(req, res){
     let settings = await getJSON('settings', null);
     if(!settings){ settings = DEFAULT_SETTINGS; await setJSON('settings', settings); }
 
-    const counts = {};
-    await Promise.all(polls.map(async function(p){
-      const raw = await redis.hgetall(countsKey(p.id));
-      counts[p.id] = normalizeCounts(raw);
-    }));
+    const counts = await getCountsForPolls(polls);
 
     res.status(200).json({ board: board, polls: polls, settings: settings, counts: counts, archived: isArchived() });
   }catch(err){

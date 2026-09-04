@@ -1,5 +1,5 @@
 const { redis, getJSON, setJSON, countsKey, votersKey,
-        DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard, blockIfArchived } = require('../lib/store');
+        DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard, blockIfArchived, clearAllCountsCache } = require('../lib/store');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'POST') return res.status(405).json({ error:'POST only' });
@@ -10,6 +10,7 @@ module.exports = async function handler(req, res){
     await Promise.all(prevPolls.map(function(p){
       return Promise.all([ redis.del(countsKey(p.id)), redis.del(votersKey(p.id)) ]);
     }));
+    await clearAllCountsCache();
 
     await setJSON('board', defaultBoard());
     await setJSON('polls', DEFAULT_POLLS);
