@@ -15,6 +15,14 @@
     --chalk:#EEF3F8;--muted:#8C9AAC;--line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.16);--ok:#3FBF7F;
   }
   *{box-sizing:border-box}
+  /* The browser's built-in `[hidden]{display:none}` rule is a User
+     Agent style, and author CSS always wins over UA styles regardless
+     of selector specificity. So any element with `hidden` that also
+     matches a later class rule setting its own `display` (e.g.
+     .polls{display:grid}) stays visible — the attribute silently does
+     nothing. This makes `hidden` win outright, everywhere on the page,
+     so it can be relied on the same way `display:none` can. */
+  [hidden]{display:none!important}
   html{scroll-behavior:smooth}
   body{margin:0;overflow-x:hidden;
     background:
