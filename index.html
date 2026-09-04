@@ -127,6 +127,11 @@
   .btn:hover{background:var(--orange-soft);transform:translateY(-2px)}
   .btn.ghost{background:transparent;color:var(--chalk);border:1px solid var(--line-strong)}
   .btn.ghost:hover{border-color:var(--orange);color:var(--orange)}
+  .btnrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:20px}
+  .btnrow .btn{margin-top:0}
+  .step .discord-cta{margin-top:20px}
+  .step .discord-cta .btn.ghost{margin-top:0;border-color:rgba(88,101,242,.6);color:#C3C9FA}
+  .step .discord-cta .btn.ghost:hover{border-color:#5865F2;background:#5865F2;color:#fff}
   .linkline{margin-top:14px;font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted);word-break:break-all}
 
   .polls{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -306,6 +311,35 @@
       </div>
     </div>
     <div class="callout">Bring cash to the draft or be prepared to pay Commissioner Garrett your entry fee via Venmo.</div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<section id="next">
+  <div class="wrap">
+    <div class="shead"><span class="yard">2nd &amp; short</span><h2>Then do these two</h2></div>
+    <p class="sub">Not urgent, but both pay off before the draft.</p>
+    <div class="steps">
+      <div class="step">
+        <span class="jersey">3</span>
+        <h3>Get on the Discord</h3>
+        <p>Where the trash talk, trade offers, and draft-day logistics live all season. Join before September 5 so you're not the one asking what time we're starting.</p>
+        <div class="discord-cta">
+          <img class="discord-mark" src="assets/discord-mark.svg" alt="" width="50" height="50" aria-hidden="true">
+          <a class="btn ghost" href="https://discord.gg/REPLACE-ME" target="_blank" rel="noopener">Open Discord invite</a>
+        </div>
+      </div>
+      <div class="step">
+        <span class="jersey">4</span>
+        <h3>Set your pre-draft rankings</h3>
+        <p>Yahoo drafts off a default list unless you change it, so a few minutes here is worth a lot on the clock — and it's what autopicks for you if you step away or lose signal.</p>
+        <div class="btnrow">
+          <a class="btn ghost" href="resources.html">Rankings &amp; resources</a>
+          <a class="btn ghost" href="https://help.yahoo.com/kb/pre-rank-players-prepare-autopick-drafts-sln6163.html" target="_blank" rel="noopener">How to pre-rank on Yahoo</a>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
