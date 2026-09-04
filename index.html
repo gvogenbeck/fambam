@@ -132,6 +132,14 @@
   .step .discord-cta{margin-top:20px}
   .step .discord-cta .btn.ghost{margin-top:0;border-color:rgba(88,101,242,.6);color:#C3C9FA}
   .step .discord-cta .btn.ghost:hover{border-color:#5865F2;background:#5865F2;color:#fff}
+  /* No invite link saved yet. An <a> with no href is already inert and
+     out of the tab order, so this is purely the visual half: a dashed,
+     dimmed chip that clearly isn't a button, with every hover rule from
+     the live state neutralized. */
+  .btn.pending{cursor:default;opacity:.5;border-style:dashed}
+  .btn.pending:hover{transform:none}
+  .discord .btn.ghost.pending:hover,
+  .step .discord-cta .btn.ghost.pending:hover{border-color:rgba(88,101,242,.6);background:transparent;color:#C3C9FA}
   .linkline{margin-top:14px;font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted);word-break:break-all}
 
   .polls{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -230,7 +238,7 @@
       <a href="#roster">Who's in</a>
       <a href="#rules">Rules</a>
       <a href="resources.html">Resources</a>
-      <a href="https://discord.gg/REPLACE-ME" target="_blank" rel="noopener" class="discordnav" aria-label="Join the league Discord">
+      <a class="discordnav" data-discord-nav style="display:none" aria-label="Join the league Discord">
         <img src="assets/discord-lockup.svg" alt="Discord" width="95" height="26">
       </a>
       <a href="https://football.fantasysports.yahoo.com/league/fambam_fantasy_football" target="_blank" rel="noopener" class="cta">Go to League</a>
@@ -267,7 +275,7 @@
         <p>Trades, waiver-wire gloating, and draft-day logistics all live here. Get in before the draft so you don't miss anything.</p>
         <div class="discord-cta">
           <img class="discord-mark" src="assets/discord-mark.svg" alt="" width="50" height="50" aria-hidden="true">
-          <a class="btn ghost" href="https://discord.gg/REPLACE-ME" target="_blank" rel="noopener">Open Discord invite</a>
+          <a class="btn ghost pending" data-discord-link aria-disabled="true">Invite coming soon</a>
         </div>
       </div>
     </div>
@@ -327,7 +335,7 @@
         <p>Where the trash talk, trade offers, and draft-day logistics live all season. Join before September 5 so you're not the one asking what time we're starting.</p>
         <div class="discord-cta">
           <img class="discord-mark" src="assets/discord-mark.svg" alt="" width="50" height="50" aria-hidden="true">
-          <a class="btn ghost" href="https://discord.gg/REPLACE-ME" target="_blank" rel="noopener">Open Discord invite</a>
+          <a class="btn ghost pending" data-discord-link aria-disabled="true">Invite coming soon</a>
         </div>
       </div>
       <div class="step">
@@ -612,7 +620,48 @@
     document.getElementById('cTotal2').textContent = rows.length;
   }
 
-  function renderAll(){ renderFacts(); renderPolls(); renderBoard(); }
+  /* Mirror of the admin-side normalizer, so a value saved before that
+     normalizing existed (or hand-edited via an import) still resolves. */
+  function discordUrl(){
+    var v = String(DB.getSettings().discordUrl || '').trim();
+    if(!v) return '';
+    if(/^https?:\/\//i.test(v)) return v;
+    return 'https://discord.gg/' + v.replace(/^\/+/, '').replace(/^discord\.gg\//i, '');
+  }
+
+  function renderDiscord(){
+    var url = discordUrl();
+
+    /* The stylesheet gives .discordnav display:flex, so this toggles
+       the inline value rather than the hidden attribute — the two
+       fight each other and the attribute loses. */
+    var nav = document.querySelector('[data-discord-nav]');
+    if(nav){
+      if(url){ nav.href = url; nav.target = '_blank'; nav.rel = 'noopener'; nav.style.display = ''; }
+      else { nav.removeAttribute('href'); nav.style.display = 'none'; }
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-discord-link]'), function(a){
+      if(url){
+        a.setAttribute('href', url);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener');
+        a.removeAttribute('aria-disabled');
+        a.classList.remove('pending');
+        a.textContent = 'Open Discord invite';
+      } else {
+        /* dropping href is what actually makes it unclickable */
+        a.removeAttribute('href');
+        a.removeAttribute('target');
+        a.removeAttribute('rel');
+        a.setAttribute('aria-disabled', 'true');
+        a.classList.add('pending');
+        a.textContent = 'Invite coming soon';
+      }
+    });
+  }
+
+  function renderAll(){ renderFacts(); renderDiscord(); renderPolls(); renderBoard(); }
 
   (async function init(){
     try{

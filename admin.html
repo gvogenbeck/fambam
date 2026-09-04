@@ -275,6 +275,7 @@
         <div><label class="f" for="sFee">Buy-in</label><input type="text" id="sFee" placeholder="$10"></div>
         <div><label class="f" for="sPayout">Payout</label><input type="text" id="sPayout" placeholder="$100 — Winner takes all"></div>
         <div><label class="f" for="sScoring">Scoring</label><input type="text" id="sScoring" placeholder="0.5 PPR"></div>
+        <div><label class="f" for="sDiscord">Discord invite — paste the full link or just the code. Leave blank and the hub hides the Discord buttons.</label><input type="text" id="sDiscord" placeholder="https://discord.gg/aB3xY9"></div>
       </div>
       <button class="btn sm" id="saveSettings">Save league facts</button>
     </div>
@@ -632,6 +633,17 @@
        touching these doesn't blank them out */
     document.getElementById('sPayout').value = s.payout || '$100 — Winner takes all';
     document.getElementById('sScoring').value = s.scoring || '0.5 PPR';
+    document.getElementById('sDiscord').value = s.discordUrl || '';
+  }
+
+  /* Accepts either a full URL or a bare invite code, so it doesn't
+     matter whether Discord's share sheet or the address bar was the
+     source. Anything already carrying a scheme is left alone. */
+  function normalizeDiscord(v){
+    v = String(v == null ? '' : v).trim();
+    if(!v) return '';
+    if(/^https?:\/\//i.test(v)) return v;
+    return 'https://discord.gg/' + v.replace(/^\/+/, '').replace(/^discord\.gg\//i, '');
   }
   document.getElementById('saveSettings').addEventListener('click', async function(){
     try{
@@ -641,8 +653,12 @@
         venue: document.getElementById('sVenue').value,
         entryFee: document.getElementById('sFee').value,
         payout: document.getElementById('sPayout').value,
-        scoring: document.getElementById('sScoring').value
+        scoring: document.getElementById('sScoring').value,
+        discordUrl: normalizeDiscord(document.getElementById('sDiscord').value)
       });
+      /* reflect the normalized value back so what's on screen matches
+         what the hub will actually link to */
+      fillSettingsForm();
       flashSaved();
     }catch(err){ flashError(err.message); console.error(err); }
   });
