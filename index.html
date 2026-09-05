@@ -112,6 +112,15 @@
   .hero h1 .line2{display:block;color:transparent;-webkit-text-stroke:2px var(--orange)}
   .hero p.lede{max-width:52ch;margin:22px 0 0;font-size:1.06rem;color:#C9D4E1}
   .herogrid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin:26px 0 0;align-items:stretch}
+
+  /* Decorative only — desktop real estate to the right of the title.
+     Hidden below 900px, the same breakpoint everything else in the
+     header (topnav/herogrid) already collapses at. */
+  .hero-mascot{position:absolute;top:0;right:0;width:160px;text-align:center}
+  .hero-mascot img{display:block;width:100%;height:auto;border:1px solid var(--line-strong)}
+  .hero-mascot .cap{margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:.64rem;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  @media (max-width:900px){ .hero-mascot{display:none} }
   .alert{background:linear-gradient(180deg,rgba(251,79,20,.13),rgba(251,79,20,.05));
     border:1px solid rgba(251,79,20,.42);border-left:4px solid var(--orange);padding:20px 24px}
   .alert-kicker{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;
@@ -326,7 +335,7 @@
           <a class="navitem" href="resources.html#news"><span class="ni-t">News and tools</span><span class="ni-d">Injuries, depth charts</span></a>
           <a class="navitem" href="resources.html#draftday"><span class="ni-t">Draft day</span><span class="ni-d">Show up ready</span></a>
           <a class="navitem" href="resources.html#glossary"><span class="ni-t">Glossary</span><span class="ni-d">Words you'll hear</span></a>
-          <a class="navitem" href="https://board.gorgalore.com/" target="_blank" rel="noopener"><span class="ni-t">The Gorgboard<span class="ext">&#8599;</span></span><span class="ni-d">Live rankings and draft tracker</span></a>
+          <a class="navitem" href="https://board.gorgalore.com/" target="_blank" rel="noopener"><span class="ni-t">The Gorgboard<span class="ext">&#8599;</span></span><span class="ni-d">Commissioner rankings &amp; more and draft tracker</span></a>
           </div>
         </div>
       </div>
@@ -399,6 +408,10 @@
 <header class="hero">
   <div class="wrap">
     <p class="eyebrow" id="factTeaser">Saturday, September 5 &middot; Live In-Person Draft &middot; $10 Buy-in</p>
+    <div class="hero-mascot" aria-hidden="true">
+      <img src="assets/ffl-cat-champion.jpg" alt="" width="340" height="381">
+      <div class="cap">2026 Inaugural Season</div>
+    </div>
     <h1>FamBam<span class="line2">Fantasy</span>Football</h1>
     <div class="herogrid">
       <div class="alert">
@@ -468,7 +481,7 @@
       <div class="step">
         <span class="jersey">3</span>
         <h3>Get on the Discord</h3>
-        <p>Where the trash talk, trade offers, and draft-day logistics live all season. Join before September 5 so you're not the one asking what time we're starting.</p>
+        <p>Join the Discord channel so we can avoid another group text.</p>
         <div class="discord-cta">
           <img class="discord-mark" src="assets/discord-mark.svg" alt="" width="50" height="50" aria-hidden="true">
           <a class="btn ghost pending" data-discord-link aria-disabled="true">Invite coming soon</a>
@@ -477,7 +490,7 @@
       <div class="step">
         <span class="jersey">4</span>
         <h3>Set your pre-draft rankings</h3>
-        <p>Yahoo drafts off a default list unless you change it, so a few minutes here is worth a lot on the clock — and it's what autopicks for you if you step away or lose signal.</p>
+        <p>Yahoo drafts off a default list unless you change it.</p>
         <div class="btnrow">
           <a class="btn ghost" href="resources.html">Rankings &amp; resources</a>
           <a class="btn ghost" href="https://help.yahoo.com/kb/pre-rank-players-prepare-autopick-drafts-sln6163.html" target="_blank" rel="noopener">How to pre-rank on Yahoo</a>
