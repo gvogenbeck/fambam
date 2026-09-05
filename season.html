@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FamBam Fantasy Football — Season Archive</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Chivo:wght@300;400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --field:#070B12;--panel:#0E1626;--panel-2:#131F33;--deep:#002244;
+    --orange:#FB4F14;--orange-soft:#FF8A55;--blue:#4C8FD6;
+    --chalk:#EEF3F8;--muted:#8C9AAC;--line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.16);--ok:#3FBF7F;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;overflow-x:hidden;
+    background:
+      radial-gradient(1100px 620px at 78% -12%, rgba(251,79,20,.16), transparent 62%),
+      radial-gradient(900px 620px at 8% 0%, rgba(0,34,68,.85), transparent 60%),
+      var(--field);
+    color:var(--chalk);font-family:"Chivo",system-ui,sans-serif;font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 22px}
+  a{color:var(--orange-soft)}
+  h1,h2,h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:800;letter-spacing:.01em;text-transform:uppercase;margin:0}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+
+  .banner{border-bottom:1px solid var(--line-strong);background:rgba(251,79,20,.07);padding:14px 0}
+  .banner .wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.9rem}
+  .banner strong{color:var(--orange-soft)}
+  .banner a{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:.78rem}
+
+  header.page{padding:44px 0 30px;border-bottom:1px solid var(--line)}
+  header.page h1{font-size:clamp(2.4rem,6vw,3.6rem);margin-top:6px}
+
+  section{padding:34px 0}
+  .shead{display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+  .shead .yard{font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.22em;color:var(--orange)}
+  .shead h2{font-size:1.6rem}
+  .sub{color:var(--muted);max-width:66ch;margin:0 0 20px;font-size:.9rem}
+
+  .facts{display:flex;flex-wrap:wrap;gap:0;margin:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .fact{flex:1 1 170px;padding:16px 20px 18px;border-right:1px solid var(--line)}
+  .fact .k{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+  .fact .v{font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;font-size:1.32rem;line-height:1.15;margin-top:5px}
+  .fact .v.hot{color:var(--orange)}
+
+  .board{border:1px solid var(--line);background:var(--panel)}
+  .brow{display:grid;grid-template-columns:46px 1fr 130px 110px;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+  .brow.head{background:var(--panel-2);border-bottom:1px solid var(--line-strong);padding:9px 16px}
+  .brow.head span{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .brow:last-child{border-bottom:0}
+  .slot{font-family:"IBM Plex Mono",monospace;font-size:.82rem;color:var(--orange)}
+  .mgr{font-family:"Barlow Condensed",sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:1.24rem}
+  .mgr.empty{color:#4E5C6E}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-family:"IBM Plex Mono",monospace;font-size:.64rem;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:6px 10px;width:fit-content}
+  .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:#3A4A61}
+  .chip.on{color:var(--ok);border-color:rgba(63,191,127,.45)}
+  .chip.on::before{background:var(--ok)}
+  .chip.on.pay{color:var(--orange);border-color:rgba(251,79,20,.5)}
+  .chip.on.pay::before{background:var(--orange)}
+
+  .polls{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{background:var(--panel);border:1px solid var(--line);padding:24px}
+  .card h3{font-size:1.15rem;margin-bottom:6px}
+  .card .hint{color:var(--muted);font-size:.84rem;margin:0 0 16px}
+  .optrow{width:100%;text-align:left;background:var(--panel-2);border:1px solid var(--line);color:var(--chalk);
+    position:relative;padding:11px 14px;margin-bottom:8px;font-family:"Chivo",sans-serif;font-size:.92rem;overflow:hidden}
+  .optrow .bar{position:absolute;inset:0 auto 0 0;width:0;background:rgba(251,79,20,.2)}
+  .optrow .txt{position:relative;display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .optrow .pct{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--muted)}
+  .tallynote{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.1em;color:var(--muted);margin-top:10px}
+
+  footer{border-top:1px solid var(--line);padding:36px 0 56px;color:var(--muted);font-size:.84rem}
+
+  @media (max-width:700px){ .polls{grid-template-columns:1fr} .brow{grid-template-columns:36px 1fr 100px 88px;font-size:.9rem} }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <div class="wrap">
+    <strong>Archived</strong>
+    <span id="bannerLabel">Loading snapshot&hellip;</span>
+    <a href="index.html">Back to the live hub &rarr;</a>
+  </div>
+</div>
+
+<header class="page">
+  <div class="wrap">
+    <p class="eyebrow">FamBam Fantasy Football</p>
+    <h1 id="pageTitle">Season archive</h1>
+    <div class="facts" id="factsRow" hidden>
+      <div class="fact"><div class="k">Draft day</div><div class="v" id="factDate">&mdash;</div></div>
+      <div class="fact"><div class="k">Where</div><div class="v" id="factWhere">&mdash;</div></div>
+      <div class="fact"><div class="k">Buy-in</div><div class="v hot" id="factFee">&mdash;</div></div>
+      <div class="fact"><div class="k">Payout</div><div class="v hot" id="factPayout">&mdash;</div></div>
+      <div class="fact"><div class="k">Scoring</div><div class="v hot" id="factScoring">&mdash;</div></div>
+    </div>
+  </div>
+</header>
+
+<div id="notFound" class="wrap" style="padding:40px 0" hidden>
+  <p style="font-size:1.1rem">This snapshot doesn't exist, or the link is no longer valid.</p>
+  <p><a href="index.html">Back to the live hub</a></p>
+</div>
+
+<div id="content" hidden>
+  <section id="roster">
+    <div class="wrap">
+      <div class="shead"><span class="yard">As it stood</span><h2>Roster board</h2></div>
+      <div class="board">
+        <div class="brow head"><span>#</span><span>Manager</span><span>Signed up</span><span>Paid</span></div>
+        <div id="boardBody"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><div style="border-top:1px solid var(--line);margin:0 0 8px"></div></div>
+
+  <section id="vote">
+    <div class="wrap">
+      <div class="shead"><span class="yard">Final tallies</span><h2>How the votes landed</h2></div>
+      <div class="polls" id="pollHost"></div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">FamBam Fantasy Football &middot; <a href="index.html">back to the hub</a></div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function qs(name){
+    return new URLSearchParams(window.location.search).get(name);
+  }
+
+  function fmtDate(iso){
+    var d = new Date(iso);
+    if(isNaN(d)) return '';
+    return d.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+  }
+
+  function renderFacts(settings){
+    var s = settings || {};
+    document.getElementById('factDate').innerHTML = esc(s.draftLabel||'TBD').replace(' — ','<br>');
+    document.getElementById('factWhere').innerHTML = esc(s.venue||'TBD').replace(' — ','<br>');
+    document.getElementById('factFee').textContent = s.entryFee || 'TBD';
+    document.getElementById('factPayout').innerHTML = esc(s.payout||'TBD').replace(' — ','<br>');
+    document.getElementById('factScoring').innerHTML = esc(s.scoring||'TBD').replace(' — ','<br>');
+    document.getElementById('factsRow').hidden = false;
+  }
+
+  function renderBoard(rows){
+    var body = document.getElementById('boardBody');
+    body.innerHTML = '';
+    (rows||[]).forEach(function(r,i){
+      var row = document.createElement('div');
+      row.className = 'brow';
+      var n = String(i+1).padStart(2,'0');
+      row.innerHTML =
+        '<span class="slot">'+n+'</span>'+
+        '<span class="mgr'+(r.name?'':' empty')+'">'+esc(r.name || 'Open slot')+'</span>'+
+        '<span class="chip'+(r.signed?' on':'')+'">'+(r.signed?'Joined':'Not joined')+'</span>'+
+        '<span class="chip pay'+(r.paid?' on':'')+'">'+(r.paid?'Paid':'Unpaid')+'</span>';
+      body.appendChild(row);
+    });
+  }
+
+  function renderPolls(polls, counts){
+    var host = document.getElementById('pollHost');
+    host.innerHTML = '';
+    if(!polls || !polls.length){
+      host.innerHTML = '<div class="card"><h3>No polls recorded</h3></div>';
+      return;
+    }
+    polls.forEach(function(p){
+      var c = (counts && counts[p.id]) || {};
+      var total = p.options.reduce(function(s,o){ return s + (c[o.id]||0); },0);
+      var card = document.createElement('div');
+      card.className = 'card';
+      var html = '<h3>'+esc(p.title)+'</h3>';
+      if(p.hint) html += '<p class="hint">'+esc(p.hint)+'</p>';
+      p.options.forEach(function(o){
+        var n = c[o.id]||0, pct = total ? Math.round(n/total*100) : 0;
+        html += '<div class="optrow"><span class="bar" style="width:'+pct+'%"></span>'+
+          '<span class="txt"><span>'+esc(o.label)+'</span>'+
+          '<span class="pct">'+(total ? pct+'% &middot; '+n : '&mdash;')+'</span></span></div>';
+      });
+      html += '<p class="tallynote">'+(total===1 ? '1 vote' : total+' votes')+' &middot; final</p>';
+      card.innerHTML = html;
+      host.appendChild(card);
+    });
+  }
+
+  (async function init(){
+    var id = qs('id');
+    if(!id){
+      document.getElementById('notFound').hidden = false;
+      document.getElementById('bannerLabel').textContent = 'No snapshot specified.';
+      return;
+    }
+    var snap;
+    try{
+      var res = await fetch('/api/snapshots?id='+encodeURIComponent(id));
+      if(!res.ok){
+        document.getElementById('notFound').hidden = false;
+        document.getElementById('bannerLabel').textContent = 'Snapshot not found.';
+        return;
+      }
+      snap = await res.json();
+    }catch(e){
+      document.getElementById('notFound').hidden = false;
+      document.getElementById('bannerLabel').textContent = 'Could not reach the archive. Check your connection and reload.';
+      return;
+    }
+
+    document.title = 'FamBam Fantasy Football — ' + (snap.label || 'Season Archive');
+    document.getElementById('pageTitle').textContent = snap.label || 'Season archive';
+    document.getElementById('bannerLabel').innerHTML =
+      '<strong>'+esc(snap.label||'Untitled')+'</strong> &middot; frozen '+esc(fmtDate(snap.createdAt));
+
+    renderFacts(snap.settings);
+    renderBoard(snap.board);
+    renderPolls(snap.polls, snap.counts);
+    document.getElementById('content').hidden = false;
+  })();
+})();
+</script>
+</body>
+</html>

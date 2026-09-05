@@ -81,6 +81,13 @@
   .mrow:last-child{border-bottom:0}
   .slot{font-family:"IBM Plex Mono",monospace;font-size:.82rem;color:var(--orange)}
 
+  /* snapshots */
+  .snaprow{display:grid;grid-template-columns:1fr 160px 120px 76px 40px;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
+  .snaprow.head{background:var(--panel-2);padding:8px 16px}
+  .snaprow.head span{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .snaprow:last-child{border-bottom:0}
+  .snaprow .date{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--muted)}
+
   .rowlead{display:flex;align-items:center;gap:8px}
   .draghandle{width:20px;height:20px;display:flex;align-items:center;justify-content:center;
     color:var(--muted);cursor:grab;touch-action:none;flex-shrink:0;user-select:none}
@@ -328,6 +335,24 @@
       <h3 style="font-size:1.15rem;margin-bottom:8px">Start over</h3>
       <p style="margin:0 0 14px;color:#C4CFDC;font-size:.92rem">Wipes the roster, polls, votes, and league facts, then reloads the original ten names and two starting polls.</p>
       <button class="btn sm ghost" id="resetAll">Reset everything</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">Archive</span><h2>Season snapshots</h2></div>
+    <p class="sub">Freeze the board, polls, votes, and facts exactly as they stand right now. A snapshot never changes after it's taken — new votes and edits keep landing on the live hub, not on it. Private by default; flip one public to get a shareable read-only link.</p>
+    <div class="panel pad">
+      <label class="f">Label</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="snapLabel" placeholder="e.g. 2026 Season" style="flex:1;min-width:200px">
+        <button class="btn sm" id="createSnap">Archive current season</button>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:14px">
+      <div class="snaprow head"><span>Label</span><span>Archived</span><span>Visibility</span><span>Link</span><span></span></div>
+      <div id="snapHost"></div>
     </div>
   </div>
 </section>
@@ -754,6 +779,72 @@
     });
   });
 
+  /* ============ SNAPSHOTS ============ */
+  var snapHost = document.getElementById('snapHost');
+
+  function fmtDate(iso){
+    var d = new Date(iso);
+    if(isNaN(d)) return iso || '';
+    return d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+  }
+
+  async function renderSnapshots(){
+    var data;
+    try{ data = await DB.listSnapshots(); }
+    catch(err){
+      snapHost.innerHTML = '<div style="padding:16px;color:#E0533B;font-family:\'IBM Plex Mono\',monospace;font-size:.82rem">Could not load snapshots. '+DB.esc(err.message)+'</div>';
+      return;
+    }
+    var list = (data && data.snapshots) || [];
+    snapHost.innerHTML = '';
+    if(!list.length){
+      snapHost.innerHTML = '<div style="padding:16px;color:#8C9AAC;font-size:.9rem">No snapshots yet. Archiving the current season is the only way to create one — there is no undo, but nothing about doing it changes the live hub.</div>';
+      return;
+    }
+    list.forEach(function(s){
+      var row = document.createElement('div');
+      row.className = 'snaprow';
+      row.innerHTML =
+        '<span>'+DB.esc(s.label||s.id)+'</span>'+
+        '<span class="date">'+DB.esc(fmtDate(s.createdAt))+'</span>'+
+        '<label class="toggle">'+
+          '<input type="checkbox" class="pubToggle"'+(s.isPublic?' checked':'')+'>'+
+          '<span class="track"></span>'+
+          '<span class="tlabel">'+(s.isPublic?'Public':'Private')+'</span>'+
+        '</label>'+
+        '<a class="btn sm ghost" href="season.html?id='+encodeURIComponent(s.id)+'" target="_blank" rel="noopener">View</a>'+
+        '<button class="x delSnap" title="Delete snapshot" aria-label="Delete snapshot">&times;</button>';
+
+      row.querySelector('.pubToggle').addEventListener('change', async function(e){
+        var checked = e.target.checked;
+        row.querySelector('.tlabel').textContent = checked ? 'Public' : 'Private';
+        try{ await DB.setSnapshotVisibility(s.id, checked); flashSaved(); }
+        catch(err){ e.target.checked = !checked; row.querySelector('.tlabel').textContent = !checked ? 'Public' : 'Private'; flashError(err.message); }
+      });
+
+      row.querySelector('.delSnap').addEventListener('click', async function(){
+        if(!confirm('Delete the snapshot "'+(s.label||s.id)+'"? This can\u2019t be undone — the link stops working immediately.')) return;
+        try{ await DB.deleteSnapshot(s.id); flashSaved(); }
+        catch(err){ flashError(err.message); console.error(err); }
+        renderSnapshots();
+      });
+
+      snapHost.appendChild(row);
+    });
+  }
+
+  document.getElementById('createSnap').addEventListener('click', async function(){
+    var input = document.getElementById('snapLabel');
+    var label = input.value.trim();
+    if(!label){ flashError('Give the snapshot a label first (e.g. "2026 Season").'); return; }
+    try{
+      await DB.createSnapshot(label);
+      input.value = '';
+      flashSaved();
+      renderSnapshots();
+    }catch(err){ flashError(err.message); console.error(err); }
+  });
+
   (async function init(){
     try{
       await DB.load();
@@ -765,7 +856,7 @@
     if(DB.isArchived()){
       document.getElementById('archiveBanner').style.display = '';
     }
-    renderMgrs(); renderPolls(); fillSettingsForm(); refreshExport();
+    renderMgrs(); renderPolls(); fillSettingsForm(); refreshExport(); renderSnapshots();
   })();
 })();
 </script>

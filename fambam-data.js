@@ -167,6 +167,17 @@
       await load();
     },
 
+    /* season snapshots — frozen copies, independent of the live cache
+       above. These don't touch `cache`, since a snapshot is a separate
+       read: it's never "the current state," even right after it's taken. */
+    listSnapshots: function(){ return api('snapshots'); },
+    getSnapshot: function(id){ return api('snapshots?id='+encodeURIComponent(id)); },
+    createSnapshot: function(label){ return postJSON('snapshots', { action:'create', label:label }); },
+    setSnapshotVisibility: function(id, isPublic){
+      return postJSON('snapshots', { action:'setVisibility', id:id, isPublic:!!isPublic });
+    },
+    deleteSnapshot: function(id){ return postJSON('snapshots', { action:'delete', id:id }); },
+
     defaults: {
       names: ['Garrett','Ethan','Henri','Emmett','Brennan','Cade','James','Dirk','David','Brielle']
     }
