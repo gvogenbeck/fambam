@@ -152,6 +152,23 @@
 
   .polls{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   .card{background:var(--panel);border:1px solid var(--line);padding:26px}
+
+  /* Commissioner's announcement popup */
+  .announce-overlay{position:fixed;inset:0;z-index:100;background:rgba(3,6,10,.78);
+    display:flex;align-items:center;justify-content:center;padding:22px}
+  .announce-modal{position:relative;max-width:460px;width:100%;
+    background:linear-gradient(180deg,var(--panel),#0B1322);border:1px solid var(--line-strong);
+    padding:30px 30px 28px;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  .announce-modal::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--orange)}
+  .announce-kicker{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--orange-soft);margin-bottom:10px}
+  .announce-modal h3{font-size:1.6rem;margin-bottom:14px}
+  .announce-body p{margin:0 0 10px;font-size:.96rem;line-height:1.6;color:var(--chalk);font-weight:300}
+  .announce-body p:last-child{margin-bottom:0}
+  .announce-modal .btn{margin-top:22px}
+  .announce-x{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);
+    font-size:1.5rem;line-height:1;cursor:pointer;padding:6px 10px}
+  .announce-x:hover,.announce-x:focus-visible{color:var(--chalk)}
   .card h3{font-size:1.28rem;margin-bottom:4px}
   .card .hint{color:var(--muted);font-size:.84rem;margin:0 0 18px}
   .opt{width:100%;text-align:left;background:var(--panel-2);border:1px solid var(--line);color:var(--chalk);
@@ -233,6 +250,16 @@
 </style>
 </head>
 <body>
+
+<div class="announce-overlay" id="announceOverlay" hidden>
+  <div class="announce-modal" role="dialog" aria-modal="true" aria-labelledby="announceTitle">
+    <button class="announce-x" id="announceClose" aria-label="Close announcement">&times;</button>
+    <p class="announce-kicker">Commissioner's announcement</p>
+    <h3 id="announceTitle">Heads up</h3>
+    <div class="announce-body" id="announceBody"></div>
+    <button class="btn sm" id="announceOk">Got it</button>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="wrap">
@@ -669,6 +696,54 @@
     });
   }
 
+  /* ============ COMMISSIONER'S ANNOUNCEMENT ============
+     Deliberately checked once, right after the first load — not from
+     renderAll(), which the background poller also calls every 60s.
+     Otherwise editing the settings elsewhere while a tab sits open
+     could pop the modal back up mid-browse. The seen-marker is the
+     message text itself: unchanged text won't re-show in the same
+     browser session, but editing the message (even the toggle staying
+     on) makes it resurface for everyone, including people who already
+     dismissed the old wording. */
+  var ANNOUNCE_SEEN_KEY = 'fambam.seenAnnouncement';
+
+  function announceOverlay(){ return document.getElementById('announceOverlay'); }
+
+  function showAnnouncement(text){
+    var body = document.getElementById('announceBody');
+    var paras = text.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+    body.innerHTML = paras.map(function(p){ return '<p>'+DB.esc(p)+'</p>'; }).join('');
+    var overlay = announceOverlay();
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    document.getElementById('announceClose').focus();
+    try{ sessionStorage.setItem(ANNOUNCE_SEEN_KEY, text); }catch(e){}
+  }
+
+  function hideAnnouncement(){
+    announceOverlay().hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  function maybeShowAnnouncement(){
+    var s = DB.getSettings();
+    var text = String(s.announceText || '').trim();
+    if(!s.announceOn || !text) return;
+    var seen = null;
+    try{ seen = sessionStorage.getItem(ANNOUNCE_SEEN_KEY); }catch(e){}
+    if(seen === text) return;
+    showAnnouncement(text);
+  }
+
+  document.getElementById('announceClose').addEventListener('click', hideAnnouncement);
+  document.getElementById('announceOk').addEventListener('click', hideAnnouncement);
+  announceOverlay().addEventListener('click', function(e){
+    if(e.target === announceOverlay()) hideAnnouncement();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && !announceOverlay().hidden) hideAnnouncement();
+  });
+
   function renderAll(){ renderFacts(); renderDiscord(); renderPolls(); renderBoard(); }
 
   (async function init(){
@@ -681,6 +756,7 @@
       return;
     }
     renderAll();
+    maybeShowAnnouncement();
     tickClock();
     setInterval(tickClock, 30000);
     if(DB.isArchived()) return; /* frozen data won't change — no need to keep polling */

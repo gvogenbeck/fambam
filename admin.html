@@ -133,6 +133,9 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .panel.pad{padding:22px}
   textarea{min-height:150px;font-family:"IBM Plex Mono",monospace;font-size:.76rem;line-height:1.5;resize:vertical}
+  /* Announcement copy is prose the family reads, not JSON — override
+     the monospace default from the export/import boxes above. */
+  #aText{font-family:"Chivo",sans-serif;font-size:.92rem;line-height:1.55;min-height:120px}
   .danger{border-color:rgba(224,83,59,.4)}
   .danger h3{color:#E0533B}
 
@@ -278,6 +281,23 @@
         <div><label class="f" for="sDiscord">Discord invite — paste the full link or just the code. Leave blank and the hub hides the Discord buttons.</label><input type="text" id="sDiscord" placeholder="https://discord.gg/aB3xY9"></div>
       </div>
       <button class="btn sm" id="saveSettings">Save league facts</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><span class="yard">Hub popup</span><h2>Commissioner's announcement</h2></div>
+    <p class="sub">When turned on, this shows as a one-time popup the moment someone loads the hub. Each browser remembers it's been shown for the current message — editing the text brings it back for everyone; leaving it as-is won't re-show it to people who already dismissed it.</p>
+    <div class="panel pad">
+      <label class="toggle" style="margin-bottom:14px">
+        <input type="checkbox" id="aOn"><span class="track"></span><span class="tlabel">Show on homepage</span>
+      </label>
+      <div>
+        <label class="f" for="aText">Message</label>
+        <textarea id="aText" placeholder="Draft starts at 4pm sharp — get your pre-rankings in before then!"></textarea>
+      </div>
+      <button class="btn sm" id="saveAnnounce" style="margin-top:14px">Save announcement</button>
     </div>
   </div>
 </section>
@@ -622,7 +642,12 @@
     window.scrollTo({top: pollHost.lastChild.offsetTop - 80, behavior:'smooth'});
   });
 
-  /* ============ LEAGUE FACTS ============ */
+  /* ============ LEAGUE FACTS + ANNOUNCEMENT ============
+     Both cards write the same server-side settings blob, and
+     DB.setSettings replaces it wholesale rather than patching fields.
+     So both Save buttons read every field from both forms and send
+     the same complete object — whichever button is clicked, nothing
+     on the other card gets wiped out. */
   function fillSettingsForm(){
     var s = DB.getSettings();
     document.getElementById('sDate').value = s.draftISO || '';
@@ -634,6 +659,8 @@
     document.getElementById('sPayout').value = s.payout || '$100 — Winner takes all';
     document.getElementById('sScoring').value = s.scoring || '0.5 PPR';
     document.getElementById('sDiscord').value = s.discordUrl || '';
+    document.getElementById('aOn').checked = !!s.announceOn;
+    document.getElementById('aText').value = s.announceText || '';
   }
 
   /* Accepts either a full URL or a bare invite code, so it doesn't
@@ -645,19 +672,31 @@
     if(/^https?:\/\//i.test(v)) return v;
     return 'https://discord.gg/' + v.replace(/^\/+/, '').replace(/^discord\.gg\//i, '');
   }
+  function collectSettings(){
+    return {
+      draftISO: document.getElementById('sDate').value,
+      draftLabel: document.getElementById('sLabel').value,
+      venue: document.getElementById('sVenue').value,
+      entryFee: document.getElementById('sFee').value,
+      payout: document.getElementById('sPayout').value,
+      scoring: document.getElementById('sScoring').value,
+      discordUrl: normalizeDiscord(document.getElementById('sDiscord').value),
+      announceOn: document.getElementById('aOn').checked,
+      announceText: document.getElementById('aText').value
+    };
+  }
   document.getElementById('saveSettings').addEventListener('click', async function(){
     try{
-      await DB.setSettings({
-        draftISO: document.getElementById('sDate').value,
-        draftLabel: document.getElementById('sLabel').value,
-        venue: document.getElementById('sVenue').value,
-        entryFee: document.getElementById('sFee').value,
-        payout: document.getElementById('sPayout').value,
-        scoring: document.getElementById('sScoring').value,
-        discordUrl: normalizeDiscord(document.getElementById('sDiscord').value)
-      });
+      await DB.setSettings(collectSettings());
       /* reflect the normalized value back so what's on screen matches
          what the hub will actually link to */
+      fillSettingsForm();
+      flashSaved();
+    }catch(err){ flashError(err.message); console.error(err); }
+  });
+  document.getElementById('saveAnnounce').addEventListener('click', async function(){
+    try{
+      await DB.setSettings(collectSettings());
       fillSettingsForm();
       flashSaved();
     }catch(err){ flashError(err.message); console.error(err); }
