@@ -113,13 +113,23 @@
   .hero p.lede{max-width:52ch;margin:22px 0 0;font-size:1.06rem;color:#C9D4E1}
   .herogrid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin:26px 0 0;align-items:stretch}
 
+  /* Two-column row: title takes its natural (max-content) width on
+     the left, everything else — the "real estate" the mascot lives
+     in — is a flexible column that centers its child rather than
+     pinning it to a fixed offset. This keeps the mascot centered in
+     the actual leftover space regardless of how wide the title
+     renders at a given viewport, instead of guessing a fixed right
+     offset that only looks right at one width. */
+  .hero-top{display:grid;grid-template-columns:auto 1fr;align-items:start;gap:20px}
+  .hero-title{min-width:0}
+
   /* Decorative only — desktop real estate to the right of the title.
      Hidden below 900px, the same breakpoint everything else in the
      header (topnav/herogrid) already collapses at. */
-  .hero-mascot{position:absolute;top:0;right:0;width:160px;text-align:center}
-  .hero-mascot img{display:block;width:100%;height:auto;border:1px solid var(--line-strong)}
-  .hero-mascot .cap{margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:.64rem;
-    letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .hero-mascot{justify-self:center;text-align:center}
+  .hero-mascot img{display:block;width:clamp(210px,24vw,320px);height:auto;border:1px solid var(--line-strong)}
+  .hero-mascot .cap{margin-top:14px;font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:1.15rem;letter-spacing:.06em;text-transform:uppercase;color:var(--chalk)}
   @media (max-width:900px){ .hero-mascot{display:none} }
   .alert{background:linear-gradient(180deg,rgba(251,79,20,.13),rgba(251,79,20,.05));
     border:1px solid rgba(251,79,20,.42);border-left:4px solid var(--orange);padding:20px 24px}
@@ -407,12 +417,16 @@
 
 <header class="hero">
   <div class="wrap">
-    <p class="eyebrow" id="factTeaser">Saturday, September 5 &middot; Live In-Person Draft &middot; $10 Buy-in</p>
-    <div class="hero-mascot" aria-hidden="true">
-      <img src="assets/ffl-cat-champion.jpg" alt="" width="340" height="381">
-      <div class="cap">2026 Inaugural Season</div>
+    <div class="hero-top">
+      <div class="hero-title">
+        <p class="eyebrow" id="factTeaser">Saturday, September 5 &middot; Live In-Person Draft &middot; $10 Buy-in</p>
+        <h1>FamBam<span class="line2">Fantasy</span>Football</h1>
+      </div>
+      <div class="hero-mascot" aria-hidden="true">
+        <img src="assets/ffl-cat-champion.jpg" alt="" width="340" height="381">
+        <div class="cap">2026 Inaugural Season</div>
+      </div>
     </div>
-    <h1>FamBam<span class="line2">Fantasy</span>Football</h1>
     <div class="herogrid">
       <div class="alert">
         <p class="alert-kicker">First things first!</p>
