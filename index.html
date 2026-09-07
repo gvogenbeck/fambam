@@ -243,10 +243,15 @@
   /* Chip group — a flex row so a chip can be added without re-deriving
      .brow's grid-template-columns; wraps as one unit at mobile. */
   .crow{display:flex;gap:10px}
-  .brow.head .crow span{flex:0 0 130px}
-  .brow.head .crow span:nth-child(2){flex:0 0 110px}
-  .brow.head .crow span:nth-child(3){flex:0 0 130px}
-  .chip{display:inline-flex;align-items:center;gap:8px;font-family:"IBM Plex Mono",monospace;font-size:.64rem;
+  /* Every crow — header or data row — has exactly 3 children in the
+     same order (League, Buy-in, Discord). Sizing by position rather
+     than by content means a header label and a data chip in the same
+     slot are ALWAYS the same width, and PAID/UNPAID can't make the
+     Buy-in column jump around depending which state a row is in. */
+  .crow > :nth-child(1){flex:0 0 122px}
+  .crow > :nth-child(2){flex:0 0 104px}
+  .crow > :nth-child(3){flex:0 0 140px}
+  .chip{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:"IBM Plex Mono",monospace;font-size:.64rem;white-space:nowrap;
     letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:6px 10px}
   .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:#3A4A61}
   .chip.on{color:var(--ok);border-color:rgba(63,191,127,.45)}
