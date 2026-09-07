@@ -37,7 +37,6 @@
   a{color:var(--orange-soft)}
   h1,h2,h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:800;letter-spacing:.01em;text-transform:uppercase;margin:0}
   .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
-  #factTeaser{color:#fff;font-size:.78rem}
 
   .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(7,11,18,.82);border-bottom:1px solid var(--line)}
   .topbar .wrap{display:flex;align-items:center;gap:18px;min-height:60px;position:relative}
@@ -113,25 +112,6 @@
   .hero h1 .line2{display:block;color:transparent;-webkit-text-stroke:2px var(--orange)}
   .hero p.lede{max-width:52ch;margin:22px 0 0;font-size:1.06rem;color:#C9D4E1}
   .herogrid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin:26px 0 0;align-items:stretch}
-
-  /* Two-column row: title takes its natural (max-content) width on
-     the left, everything else — the "real estate" the mascot lives
-     in — is a flexible column that centers its child rather than
-     pinning it to a fixed offset. This keeps the mascot centered in
-     the actual leftover space regardless of how wide the title
-     renders at a given viewport, instead of guessing a fixed right
-     offset that only looks right at one width. */
-  .hero-top{display:grid;grid-template-columns:auto 1fr;align-items:start;gap:20px}
-  .hero-title{min-width:0}
-
-  /* Decorative only — desktop real estate to the right of the title.
-     Hidden below 900px, the same breakpoint everything else in the
-     header (topnav/herogrid) already collapses at. */
-  .hero-mascot{justify-self:center;margin-left:8%;text-align:center}
-  .hero-mascot img{display:block;width:clamp(210px,24vw,320px);height:auto;border:1px solid var(--line-strong)}
-  .hero-mascot .cap{margin-top:14px;font-family:"Barlow Condensed",sans-serif;font-weight:700;
-    font-size:1.15rem;letter-spacing:.06em;text-transform:uppercase;color:var(--chalk)}
-  @media (max-width:900px){ .hero-mascot{display:none} }
   .alert{background:linear-gradient(180deg,rgba(251,79,20,.13),rgba(251,79,20,.05));
     border:1px solid rgba(251,79,20,.42);border-left:4px solid var(--orange);padding:20px 24px}
   .alert-kicker{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;
@@ -253,13 +233,19 @@
     border:1px solid var(--line-strong);color:var(--muted);padding:3px 8px;margin-left:10px;vertical-align:middle}
 
   .board{border:1px solid var(--line);background:var(--panel)}
-  .brow{display:grid;grid-template-columns:46px 1fr 130px 110px;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+  .brow{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
   .brow.head{background:var(--panel-2);border-bottom:1px solid var(--line-strong);padding:9px 16px}
   .brow.head span{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
   .brow:last-child{border-bottom:0}
   .slot{font-family:"IBM Plex Mono",monospace;font-size:.86rem;color:var(--orange)}
   .mgr{font-family:"Barlow Condensed",sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:1.24rem}
   .mgr.empty{color:#4E5C6E}
+  /* Chip group — a flex row so a chip can be added without re-deriving
+     .brow's grid-template-columns; wraps as one unit at mobile. */
+  .crow{display:flex;gap:10px;flex-wrap:wrap}
+  .brow.head .crow span{flex:0 0 130px}
+  .brow.head .crow span:nth-child(2){flex:0 0 110px}
+  .brow.head .crow span:nth-child(3){flex:0 0 130px}
   .chip{display:inline-flex;align-items:center;gap:8px;font-family:"IBM Plex Mono",monospace;font-size:.64rem;
     letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:6px 10px}
   .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:#3A4A61}
@@ -267,6 +253,13 @@
   .chip.on::before{background:var(--ok)}
   .chip.on.pay{color:var(--orange);border-color:rgba(251,79,20,.5)}
   .chip.on.pay::before{background:var(--orange)}
+  /* Discord chip trades the plain dot for the actual mark, dimmed
+     until joined — same brand mark used in the nav/hero elsewhere. */
+  .chip.discordchip{gap:7px}
+  .chip.discordchip::before{content:none}
+  .chip.discordchip img{width:13px;height:13px;flex-shrink:0;opacity:.5;transition:opacity .15s ease}
+  .chip.discordchip.on{color:#8A93FF;border-color:rgba(88,101,242,.5)}
+  .chip.discordchip.on img{opacity:1}
   .boardfoot{display:flex;flex-wrap:wrap;gap:22px;align-items:center;margin-top:16px}
   .counter{font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;font-size:1.15rem}
   .counter b{color:var(--orange);font-size:1.5rem}
@@ -294,11 +287,10 @@
     .hero{padding-top:32px}
     .herogrid{grid-template-columns:1fr}
     .steps,.polls,.rulegrid,.rulegrid.two{grid-template-columns:1fr}
-    .brow{grid-template-columns:40px 1fr 1fr;row-gap:10px;column-gap:10px}
+    .brow{grid-template-columns:40px 1fr;row-gap:10px;column-gap:10px}
     .brow .slot{grid-column:1;grid-row:1}
-    .brow .mgr{grid-column:2 / span 2;grid-row:1}
-    .brow .chip:not(.pay){grid-column:2;grid-row:2}
-    .brow .chip.pay{grid-column:3;grid-row:2}
+    .brow .mgr{grid-column:2;grid-row:1}
+    .brow .crow{grid-column:1 / -1;grid-row:2}
     .brow.head{display:none}
     .step .jersey{font-size:6.4rem}
   }
@@ -346,7 +338,7 @@
           <a class="navitem" href="resources.html#news"><span class="ni-t">News and tools</span><span class="ni-d">Injuries, depth charts</span></a>
           <a class="navitem" href="resources.html#draftday"><span class="ni-t">Draft day</span><span class="ni-d">Show up ready</span></a>
           <a class="navitem" href="resources.html#glossary"><span class="ni-t">Glossary</span><span class="ni-d">Words you'll hear</span></a>
-          <a class="navitem" href="https://board.gorgalore.com/" target="_blank" rel="noopener"><span class="ni-t">The Gorgboard<span class="ext">&#8599;</span></span><span class="ni-d">Commissioner rankings &amp; more and draft tracker</span></a>
+          <a class="navitem" href="https://board.gorgalore.com/" target="_blank" rel="noopener"><span class="ni-t">The Gorgboard<span class="ext">&#8599;</span></span><span class="ni-d">Live rankings and draft tracker</span></a>
           </div>
         </div>
       </div>
@@ -418,16 +410,8 @@
 
 <header class="hero">
   <div class="wrap">
-    <div class="hero-top">
-      <div class="hero-title">
-        <p class="eyebrow" id="factTeaser">Saturday, September 5 &middot; Live In-Person Draft &middot; $10 Buy-in</p>
-        <h1>FamBam<span class="line2">Fantasy</span>Football</h1>
-      </div>
-      <div class="hero-mascot" aria-hidden="true">
-        <img src="assets/ffl-cat-champion.jpg" alt="" width="340" height="381">
-        <div class="cap">2026 Inaugural Season</div>
-      </div>
-    </div>
+    <p class="eyebrow" id="factTeaser">Saturday, September 5 &middot; Live In-Person Draft &middot; $10 Buy-in</p>
+    <h1>FamBam<span class="line2">Fantasy</span>Football</h1>
     <div class="herogrid">
       <div class="alert">
         <p class="alert-kicker">First things first!</p>
@@ -496,7 +480,7 @@
       <div class="step">
         <span class="jersey">3</span>
         <h3>Get on the Discord</h3>
-        <p>Join the Discord channel so we can avoid another group text.</p>
+        <p>Where the trash talk, trade offers, and draft-day logistics live all season. Join before September 5 so you're not the one asking what time we're starting.</p>
         <div class="discord-cta">
           <img class="discord-mark" src="assets/discord-mark.svg" alt="" width="50" height="50" aria-hidden="true">
           <a class="btn ghost pending" data-discord-link aria-disabled="true">Invite coming soon</a>
@@ -505,7 +489,7 @@
       <div class="step">
         <span class="jersey">4</span>
         <h3>Set your pre-draft rankings</h3>
-        <p>Yahoo drafts off a default list unless you change it.</p>
+        <p>Yahoo drafts off a default list unless you change it, so a few minutes here is worth a lot on the clock — and it's what autopicks for you if you step away or lose signal.</p>
         <div class="btnrow">
           <a class="btn ghost" href="resources.html">Rankings &amp; resources</a>
           <a class="btn ghost" href="https://help.yahoo.com/kb/pre-rank-players-prepare-autopick-drafts-sln6163.html" target="_blank" rel="noopener">How to pre-rank on Yahoo</a>
@@ -539,7 +523,7 @@
     <div class="shead"><span class="yard">Who's In</span><h2>Team Managers</h2></div>
     <p class="sub">Status board, kept current by the commissioner. The volume of Commissioner nagging increases as draft day approaches. League sign-up: as soon as possible. Entry fee: due by draft day.</p>
     <div class="board" id="boardBody">
-      <div class="brow head"><span>#</span><span>Manager</span><span>League</span><span>Buy-in</span></div>
+      <div class="brow head"><span>#</span><span>Manager</span><span class="crow"><span>League</span><span>Buy-in</span><span>Discord</span></span></div>
     </div>
     <div class="boardfoot">
       <div class="counter"><b id="cSigned">0</b> of <span id="cTotal">10</span> signed up</div>
@@ -798,8 +782,11 @@
       row.innerHTML =
         '<span class="slot">'+n+'</span>'+
         '<span class="mgr'+(r.name?'':' empty')+'">'+DB.esc(r.name || 'Open slot')+'</span>'+
-        '<span class="chip'+(r.signed?' on':'')+'">'+(r.signed?'Joined':'Not joined')+'</span>'+
-        '<span class="chip pay'+(r.paid?' on':'')+'">'+(r.paid?'Paid':'Unpaid')+'</span>';
+        '<span class="crow">'+
+          '<span class="chip'+(r.signed?' on':'')+'">'+(r.signed?'Joined':'Not joined')+'</span>'+
+          '<span class="chip pay'+(r.paid?' on':'')+'">'+(r.paid?'Paid':'Unpaid')+'</span>'+
+          '<span class="chip discordchip'+(r.discord?' on':'')+'"><img src="assets/discord-mark.svg" alt="" width="13" height="13" aria-hidden="true">'+(r.discord?'In Discord':'Not yet')+'</span>'+
+        '</span>';
       boardBody.appendChild(row);
     });
     document.getElementById('cSigned').textContent = rows.filter(function(r){return r.signed;}).length;
