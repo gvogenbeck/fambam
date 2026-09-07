@@ -37,6 +37,7 @@
   a{color:var(--orange-soft)}
   h1,h2,h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:800;letter-spacing:.01em;text-transform:uppercase;margin:0}
   .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+  #factTeaser{color:#fff;font-size:.78rem}
 
   .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(7,11,18,.82);border-bottom:1px solid var(--line)}
   .topbar .wrap{display:flex;align-items:center;gap:18px;min-height:60px;position:relative}
@@ -111,6 +112,13 @@
   .hero h1{font-size:clamp(3.2rem,11vw,7.4rem);line-height:.84;letter-spacing:-.01em}
   .hero h1 .line2{display:block;color:transparent;-webkit-text-stroke:2px var(--orange)}
   .hero p.lede{max-width:52ch;margin:22px 0 0;font-size:1.06rem;color:#C9D4E1}
+  .hero-top{display:grid;grid-template-columns:auto 1fr;align-items:start;gap:20px}
+  .hero-title{min-width:0}
+  .hero-mascot{justify-self:center;margin-left:8%;text-align:center}
+  .hero-mascot img{display:block;width:clamp(210px,24vw,320px);height:auto;border:1px solid var(--line-strong)}
+  .hero-mascot .cap{margin-top:14px;font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:1.15rem;letter-spacing:.06em;text-transform:uppercase;color:var(--chalk)}
+  @media (max-width:900px){ .hero-mascot{display:none} }
   .herogrid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin:26px 0 0;align-items:stretch}
   .alert{background:linear-gradient(180deg,rgba(251,79,20,.13),rgba(251,79,20,.05));
     border:1px solid rgba(251,79,20,.42);border-left:4px solid var(--orange);padding:20px 24px}
@@ -342,7 +350,8 @@
           <a class="navitem" href="resources.html#news"><span class="ni-t">News and tools</span><span class="ni-d">Injuries, depth charts</span></a>
           <a class="navitem" href="resources.html#draftday"><span class="ni-t">Draft day</span><span class="ni-d">Show up ready</span></a>
           <a class="navitem" href="resources.html#glossary"><span class="ni-t">Glossary</span><span class="ni-d">Words you'll hear</span></a>
-          <a class="navitem" href="https://board.gorgalore.com/" target="_blank" rel="noopener"><span class="ni-t">The Gorgboard<span class="ext">&#8599;</span></span><span class="ni-d">Live rankings and draft tracker</span></a>
+          <a class="navitem" href="https://board.gorgalore.com/" target="_blank" rel="noopener"><span class="ni-t">The Gorgboard<span class="ext">&#8599;</span></span><span class="ni-d">Commissioner rankings &amp; more and draft tracker</span></a>
+          <a class="navitem" href="record-book.html"><span class="ni-t">Record Book</span><span class="ni-d">Draft days and moments past</span></a>
           </div>
         </div>
       </div>
@@ -414,8 +423,16 @@
 
 <header class="hero">
   <div class="wrap">
-    <p class="eyebrow" id="factTeaser">Saturday, September 5 &middot; Live In-Person Draft &middot; $10 Buy-in</p>
-    <h1>FamBam<span class="line2">Fantasy</span>Football</h1>
+    <div class="hero-top">
+      <div class="hero-title">
+        <p class="eyebrow" id="factTeaser">Saturday, September 5 &middot; Live In-Person Draft &middot; $10 Buy-in</p>
+        <h1>FamBam<span class="line2">Fantasy</span>Football</h1>
+      </div>
+      <div class="hero-mascot" aria-hidden="true">
+        <img src="assets/ffl-cat-champion.jpg" alt="" width="340" height="381">
+        <div class="cap">2026 Inaugural Season</div>
+      </div>
+    </div>
     <div class="herogrid">
       <div class="alert">
         <p class="alert-kicker">First things first!</p>
@@ -484,7 +501,7 @@
       <div class="step">
         <span class="jersey">3</span>
         <h3>Get on the Discord</h3>
-        <p>Where the trash talk, trade offers, and draft-day logistics live all season. Join before September 5 so you're not the one asking what time we're starting.</p>
+        <p>Join the Discord channel so we can avoid another group text.</p>
         <div class="discord-cta">
           <img class="discord-mark" src="assets/discord-mark.svg" alt="" width="50" height="50" aria-hidden="true">
           <a class="btn ghost pending" data-discord-link aria-disabled="true">Invite coming soon</a>
@@ -493,7 +510,7 @@
       <div class="step">
         <span class="jersey">4</span>
         <h3>Set your pre-draft rankings</h3>
-        <p>Yahoo drafts off a default list unless you change it, so a few minutes here is worth a lot on the clock — and it's what autopicks for you if you step away or lose signal.</p>
+        <p>Yahoo drafts off a default list unless you change it.</p>
         <div class="btnrow">
           <a class="btn ghost" href="resources.html">Rankings &amp; resources</a>
           <a class="btn ghost" href="https://help.yahoo.com/kb/pre-rank-players-prepare-autopick-drafts-sln6163.html" target="_blank" rel="noopener">How to pre-rank on Yahoo</a>
