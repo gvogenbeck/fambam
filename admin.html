@@ -85,7 +85,7 @@
      a toggle is just adding a child instead of re-deriving column math
      (and .mrow's own grid-template-columns) every time. Wraps on its
      own at mobile widths via the media query below. */
-  .trow{display:flex;gap:12px;flex-wrap:wrap}
+  .trow{display:flex;gap:12px}
   .mrow.head .trow span{flex:0 0 122px}
   .mrow.head .trow span:nth-child(2),.mrow.head .trow span:nth-child(3){flex:0 0 104px}
 
@@ -120,7 +120,7 @@
   .toggle.discord input:checked + .track::after{background:#5865F2}
   .toggle input:focus-visible + .track{outline:2px solid var(--orange);outline-offset:2px}
   .tlabel{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-  .tlabel .dico{width:12px;height:12px;vertical-align:-2px;margin-right:5px;opacity:.85}
+  .tlabel .dico{width:15px;height:15px;vertical-align:-3px;margin-right:5px}
 
   .btn{background:var(--orange);color:#0A0A0A;border:0;cursor:pointer;
     font-family:"Barlow Condensed",sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.07em;font-size:.98rem;padding:11px 20px}
@@ -164,7 +164,7 @@
     .mrow .rowlead{grid-column:1;grid-row:1}
     .mrow input[type=text]{grid-column:2;grid-row:1}
     .mrow .x{grid-column:3;grid-row:1}
-    .mrow .trow{grid-column:1 / -1;grid-row:2}
+    .mrow .trow{grid-column:1 / -1;grid-row:2;flex-wrap:wrap}
     .mrow.head{display:none}
     .fields,.grid2{grid-template-columns:1fr}
   }
@@ -424,7 +424,7 @@
         '<span class="trow">'+
           '<label class="toggle"><input type="checkbox"'+(r.signed?' checked':'')+' aria-label="Signed up, slot '+n+'"><span class="track"></span><span class="tlabel">Signed up</span></label>'+
           '<label class="toggle pay"><input type="checkbox"'+(r.paid?' checked':'')+' aria-label="Paid, slot '+n+'"><span class="track"></span><span class="tlabel">Paid</span></label>'+
-          '<label class="toggle discord"><input type="checkbox"'+(r.discord?' checked':'')+' aria-label="Joined Discord, slot '+n+'"><span class="track"></span><span class="tlabel"><img class="dico" src="assets/discord-mark.svg" alt="" width="12" height="12" aria-hidden="true">Discord</span></label>'+
+          '<label class="toggle discord"><input type="checkbox"'+(r.discord?' checked':'')+' aria-label="Joined Discord, slot '+n+'"><span class="track"></span><span class="tlabel"><img class="dico" src="assets/discord-mark.svg" alt="" width="15" height="15" aria-hidden="true">Discord</span></label>'+
         '</span>'+
         '<button class="x" title="Remove manager" aria-label="Remove '+DB.esc(r.name||('slot '+n))+'">&times;</button>';
 

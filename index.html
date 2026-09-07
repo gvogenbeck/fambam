@@ -242,7 +242,7 @@
   .mgr.empty{color:#4E5C6E}
   /* Chip group — a flex row so a chip can be added without re-deriving
      .brow's grid-template-columns; wraps as one unit at mobile. */
-  .crow{display:flex;gap:10px;flex-wrap:wrap}
+  .crow{display:flex;gap:10px}
   .brow.head .crow span{flex:0 0 130px}
   .brow.head .crow span:nth-child(2){flex:0 0 110px}
   .brow.head .crow span:nth-child(3){flex:0 0 130px}
@@ -257,9 +257,8 @@
      until joined — same brand mark used in the nav/hero elsewhere. */
   .chip.discordchip{gap:7px}
   .chip.discordchip::before{content:none}
-  .chip.discordchip img{width:13px;height:13px;flex-shrink:0;opacity:.5;transition:opacity .15s ease}
+  .chip.discordchip img{width:16px;height:16px;flex-shrink:0}
   .chip.discordchip.on{color:#8A93FF;border-color:rgba(88,101,242,.5)}
-  .chip.discordchip.on img{opacity:1}
   .boardfoot{display:flex;flex-wrap:wrap;gap:22px;align-items:center;margin-top:16px}
   .counter{font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;font-size:1.15rem}
   .counter b{color:var(--orange);font-size:1.5rem}
@@ -290,7 +289,7 @@
     .brow{grid-template-columns:40px 1fr;row-gap:10px;column-gap:10px}
     .brow .slot{grid-column:1;grid-row:1}
     .brow .mgr{grid-column:2;grid-row:1}
-    .brow .crow{grid-column:1 / -1;grid-row:2}
+    .brow .crow{grid-column:1 / -1;grid-row:2;flex-wrap:wrap}
     .brow.head{display:none}
     .step .jersey{font-size:6.4rem}
   }
@@ -785,7 +784,7 @@
         '<span class="crow">'+
           '<span class="chip'+(r.signed?' on':'')+'">'+(r.signed?'Joined':'Not joined')+'</span>'+
           '<span class="chip pay'+(r.paid?' on':'')+'">'+(r.paid?'Paid':'Unpaid')+'</span>'+
-          '<span class="chip discordchip'+(r.discord?' on':'')+'"><img src="assets/discord-mark.svg" alt="" width="13" height="13" aria-hidden="true">'+(r.discord?'In Discord':'Not yet')+'</span>'+
+          '<span class="chip discordchip'+(r.discord?' on':'')+'"><img src="assets/discord-mark.svg" alt="" width="16" height="16" aria-hidden="true">'+(r.discord?'In Discord':'Not yet')+'</span>'+
         '</span>';
       boardBody.appendChild(row);
     });
