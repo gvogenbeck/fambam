@@ -1,16 +1,19 @@
-const { setJSON, readJsonBody, blockIfArchived } = require('../lib/store');
+const { setJSON, readJsonBody, blockIfArchived, requireAdmin, serverError, validateBoard } = require('../lib/store');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'POST') return res.status(405).json({ error:'POST only' });
   if(blockIfArchived(res)) return;
 
-  const body = readJsonBody(req);
-  if(!Array.isArray(body)) return res.status(400).json({ error:'Body must be an array of managers' });
-
   try{
+    if(!(await requireAdmin(req, res))) return;
+
+    const body = readJsonBody(req);
+    const invalid = validateBoard(body);
+    if(invalid) return res.status(400).json({ error: invalid });
+
     await setJSON('board', body);
     res.status(200).json({ ok:true });
   }catch(err){
-    res.status(500).json({ error: String((err && err.message) || err) });
+    serverError(res, err);
   }
 };

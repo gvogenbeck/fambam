@@ -4,6 +4,6 @@
   "private": true,
   "description": "FamBam Fantasy Football league hub — static site plus small serverless API backed by Upstash Redis.",
   "dependencies": {
-    "@upstash/redis": "latest"
+    "@upstash/redis": "1.39.0"
   }
 }

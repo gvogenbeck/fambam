@@ -34,6 +34,13 @@ the Marketplace:
 That's it — `/api/state` should now return real data instead of an
 error, and the site will work for everyone.
 
+## 3b. Set the commissioner password
+
+Project → **Settings → Environment Variables** → add `ADMIN_PASSWORD`
+with a password of your choosing (something better than the old
+`football`), then redeploy. Without it, `admin.html` can't save
+anything. See "Security, honestly" below.
+
 ## 4. Add your domain
 
 Project → **Domains** → add your domain → follow the DNS instructions
@@ -81,10 +88,28 @@ rewrite versus what's wired to the backend.
 
 ## Security, honestly
 
-While the site is *not* archived, there's still no authentication on
-the API endpoints themselves — only `admin.html`'s password screen
-gates the editing *UI*. Anyone who found `/api/board` directly could
-POST to it. Given this is a private link shared with a handful of
-family members for a few days at a time, that's an acceptable
-tradeoff — just don't post the URL anywhere public, and archive it
-(above) when it's not actively being used.
+Commissioner edits are protected **on the server**. Every write
+endpoint except voting (`board`, `settings`, `polls`, `poll-admin`,
+`reset`, and snapshot create/visibility/delete) requires the
+commissioner password in an `x-admin-key` header, checked against the
+`ADMIN_PASSWORD` environment variable. The password is not in any page
+source. `admin.html` asks `/api/auth` whether a typed password is
+right, then keeps it in `sessionStorage` for that tab only.
+
+- If `ADMIN_PASSWORD` is not set, every commissioner write is refused
+  (503) — it fails closed, not open.
+- After 10 wrong passwords from one IP in 15 minutes, that IP is
+  locked out until the window passes.
+- Changing the password: update `ADMIN_PASSWORD` in Vercel and
+  redeploy. Any open admin tab gets bounced back to the lock screen
+  on its next save.
+- Inputs are validated (shape, lengths, ids), and server errors are
+  logged rather than echoed to the browser.
+
+What is still open by design: **voting has no login.** A vote is tied
+to a random id in the browser's `localStorage`, so someone could vote
+again from a private window or another device. That's fine for family
+polls; don't use it for anything that really needs to be tamper-proof.
+Votes can only go to polls and options that actually exist, and the
+count update is a single atomic Redis script, so simultaneous votes
+can't skew the tallies.
