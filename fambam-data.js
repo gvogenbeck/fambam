@@ -10,6 +10,9 @@
   "use strict";
 
   var cache = { board: [], polls: [], settings: {}, counts: {}, archived: false };
+  /* the signed-in league member (or null) and their picks on
+     members-only polls — those live on the server, not in this browser */
+  var member = { member: null, myVotes: {} };
   var loaded = false;
 
   function esc(s){
@@ -40,15 +43,35 @@
     return id;
   }
 
-  /* "which option did *I* pick" stays local to the browser — there's
-     no login system, so the server only needs to track that a given
-     voterId has one vote per poll, not surface it back per-visitor */
+  /* "which option did *I* pick". On anonymous polls this stays local
+     to the browser; the server only tracks that a voterId has one vote.
+     On members-only polls the server is the source of truth (it follows
+     the member across devices), loaded by loadMember(). */
   function myVoteKey(pollId){ return 'fambam.myvote.'+pollId; }
+  function findPoll(pollId){
+    return (cache.polls || []).find(function(p){ return p.id === pollId; }) || null;
+  }
+  function isMembersPoll(p){ return !!p && p.voting === 'members'; }
   function getMyVote(pollId){
+    if(isMembersPoll(findPoll(pollId))) return member.myVotes[pollId] || null;
     try{ return localStorage.getItem(myVoteKey(pollId)); }catch(e){ return null; }
   }
   function setMyVote(pollId, optionId){
-    try{ localStorage.setItem(myVoteKey(pollId), optionId); }catch(e){}
+    if(isMembersPoll(findPoll(pollId))){
+      if(optionId) member.myVotes[pollId] = optionId; else delete member.myVotes[pollId];
+      return;
+    }
+    try{
+      if(optionId) localStorage.setItem(myVoteKey(pollId), optionId);
+      else localStorage.removeItem(myVoteKey(pollId));
+    }catch(e){}
+  }
+
+  async function loadMember(){
+    var data = await api('member');
+    member.member = (data && data.member) || null;
+    member.myVotes = (data && data.myVotes) || {};
+    return member.member;
   }
 
   /* The commissioner password, held for this tab only (sessionStorage)
@@ -76,7 +99,10 @@
         setAdminKey('');
         try{ window.dispatchEvent(new CustomEvent('fambam:unauthorized')); }catch(e){}
       }
-      throw new Error((data && data.error) || ('Request to '+path+' failed with status '+res.status));
+      var err = new Error((data && data.error) || ('Request to '+path+' failed with status '+res.status));
+      err.status = res.status;
+      err.data = data || {};
+      throw err;
     }
     return data;
   }
@@ -161,6 +187,22 @@
     getCounts: function(pollId){ return (cache.counts && cache.counts[pollId]) || {}; },
     getSettings: function(){ return cache.settings; },
     getMyVote: getMyVote,
+    isMembersPoll: function(pollId){ return isMembersPoll(findPoll(pollId)); },
+
+    /* league-member sign-in (magic link) */
+    loadMember: loadMember,
+    getMember: function(){ return member.member; },
+    requestSignIn: function(email){ return postJSON('member', { action:'request', email:email }); },
+    redeemSignIn: async function(token){
+      var data = await postJSON('member', { action:'redeem', token:token });
+      await loadMember();
+      return data.member;
+    },
+    signOut: async function(){
+      await postJSON('member', { action:'logout' });
+      member.member = null;
+      member.myVotes = {};
+    },
 
     /* setters — write through to the server, then update the cache */
     setBoard: async function(rows){
@@ -188,8 +230,13 @@
     removeVote: async function(pollId){
       var data = await postJSON('vote', { pollId:pollId, remove:true, voterId:voterId() });
       cache.counts[pollId] = data.counts || {};
-      try{ localStorage.removeItem(myVoteKey(pollId)); }catch(e){}
+      setMyVote(pollId, null);
       return cache.counts[pollId];
+    },
+    /* commissioner: who voted for what on a members-only poll */
+    getVoters: async function(pollId){
+      var data = await postJSON('poll-admin', { action:'voters', pollId:pollId });
+      return (data && data.voters) || [];
     },
     setCounts: async function(pollId, counts){
       await postJSON('poll-admin', { action:'setCounts', pollId:pollId, counts:counts });
@@ -199,6 +246,7 @@
       await postJSON('poll-admin', { action:'clearVotes', pollId:pollId });
       cache.counts[pollId] = {};
       try{ localStorage.removeItem(myVoteKey(pollId)); }catch(e){}
+      delete member.myVotes[pollId];
     },
 
     /* backup / restore */

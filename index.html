@@ -148,6 +148,25 @@
   .card.closed .opt{cursor:default}
   .closedtag{font-family:"IBM Plex Mono",monospace;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
     border:1px solid var(--line-strong);color:var(--muted);padding:3px 8px;margin-left:10px;vertical-align:middle}
+  .closedtag.mem{color:var(--blue);border-color:rgba(76,143,214,.55)}
+
+  /* League-member sign-in strip (members-only polls) */
+  .memberbar{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blue);
+    padding:16px 20px;margin:0 0 18px}
+  .memberbar.flash{animation:memflash 1s ease}
+  @keyframes memflash{0%,100%{border-color:var(--line);border-left-color:var(--blue)}30%{border-color:var(--orange)}}
+  .memberbar p{margin:0;font-size:.92rem;color:var(--chalk)}
+  .memberbar .who strong{color:var(--blue);font-weight:700}
+  .memberbar form{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .memberbar input{flex:1;min-width:200px;background:var(--panel-2);border:1px solid var(--line);color:var(--chalk);
+    font-family:"Chivo",sans-serif;font-size:.95rem;padding:10px 12px}
+  .memberbar input:focus{outline:none;border-color:var(--orange)}
+  .memberbar .btn{margin-top:0;padding:10px 18px;font-size:.92rem}
+  .memberbar .linkbtn{background:none;border:none;color:var(--orange-soft);cursor:pointer;font:inherit;padding:0;text-decoration:underline}
+  .memberbar .msg{margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted)}
+  .memberbar .msg.err{color:#E0533B}
+  .memberbar .msg.ok{color:var(--ok)}
+  @media (prefers-reduced-motion:reduce){.memberbar.flash{animation:none}}
 
   .board{border:1px solid var(--line);background:var(--panel)}
   /* The chip column is an explicit width (the three .crow slots below,
@@ -384,6 +403,7 @@
     <div class="shead"><span class="yard">League vote</span><h2>Manager Preference Polls</h2></div>
     <p class="sub">Pick one answer per question. Results are advisory — the commissioner has final say.</p>
     <p class="tallynote" id="frozenNote" hidden style="margin-bottom:18px">This site is archived — voting is closed and these results are final.</p>
+    <div class="memberbar" id="memberBar" hidden aria-live="polite"></div>
     <div class="polls" id="pollHost"></div>
     <div id="archivedWrap" hidden>
       <button class="archtoggle" id="archToggle" aria-expanded="false" aria-controls="archivedHost">
@@ -597,7 +617,10 @@
     var total = p.options.reduce(function(s,o){ return s + (counts[o.id]||0); },0);
     var card = document.createElement('div');
     card.className = 'card' + (readOnly ? ' closed' : '');
-    var html = '<h3>'+DB.esc(p.title)+(p.archived ? '<span class="closedtag">Closed</span>' : '')+'</h3>';
+    var members = p.voting === 'members';
+    var html = '<h3>'+DB.esc(p.title)+
+      (p.archived ? '<span class="closedtag">Closed</span>' : '')+
+      (members ? '<span class="closedtag mem">Members only</span>' : '')+'</h3>';
     if(p.hint) html += '<p class="hint">'+DB.esc(p.hint)+'</p>';
     p.options.forEach(function(o){
       var n = counts[o.id]||0, pct = total ? Math.round(n/total*100) : 0;
@@ -609,7 +632,9 @@
         '<span class="txt"><span>'+DB.esc(o.label)+'</span>'+
         '<span class="pct">'+(total ? pct+'% · '+n : '—')+'</span></span></'+tag+'>';
     });
-    html += '<p class="tallynote">'+(total===1 ? '1 vote' : total+' votes')+'</p>';
+    var note = total===1 ? '1 vote' : total+' votes';
+    if(members && !readOnly && !DB.getMember()) note += ' · sign in above to vote';
+    html += '<p class="tallynote">'+note+'</p>';
     card.innerHTML = html;
     return card;
   }
@@ -634,15 +659,106 @@
     archived.forEach(function(p){ archHost.appendChild(pollCard(p, true)); });
     archWrap.hidden = archived.length === 0;
     archCount.textContent = archived.length;
+    renderMemberBar();
   }
+
+  /* ============ LEAGUE-MEMBER SIGN-IN ============
+     Shown whenever an open poll is members-only, or someone is already
+     signed in. Signing in emails a magic link; the link lands back here
+     as #signin=<token>, which redeemFromHash() trades for a session
+     cookie. The memberMsg survives re-renders (the background poller
+     re-renders every 60s) so a status line isn't wiped mid-read. */
+  var memberBar = document.getElementById('memberBar');
+  var memberMsg = { text:'', kind:'' };
+
+  function setMemberMsg(text, kind){ memberMsg = { text:text || '', kind:kind || '' }; renderMemberBar(); }
+
+  function renderMemberBar(){
+    var me = DB.getMember();
+    var needed = !DB.isArchived() && DB.getPolls().some(function(p){ return !p.archived && p.voting === 'members'; });
+    if(!me && !needed){ memberBar.hidden = true; return; }
+    memberBar.hidden = false;
+    var msg = memberMsg.text ? '<p class="msg '+memberMsg.kind+'">'+DB.esc(memberMsg.text)+'</p>' : '';
+    if(me){
+      memberBar.innerHTML = '<p class="who">Signed in as <strong>'+DB.esc(me.name || me.email)+'</strong> — your votes on members-only polls count once, on any device. '+
+        '<button type="button" class="linkbtn" id="memberOut">Sign out</button></p>'+msg;
+      document.getElementById('memberOut').addEventListener('click', async function(){
+        try{ await DB.signOut(); setMemberMsg('Signed out.', ''); }
+        catch(err){ setMemberMsg(err.message, 'err'); return; }
+        renderPolls();
+      });
+      return;
+    }
+    /* keep whatever was typed if the poller re-renders mid-entry */
+    var prev = document.getElementById('memberEmail');
+    var typed = prev ? prev.value : '';
+    var hadFocus = prev && document.activeElement === prev;
+    memberBar.innerHTML = '<p>Polls marked <strong>Members only</strong> need you to sign in with the email the commissioner has for you. We\u2019ll email you a one-tap link — no password.</p>'+
+      '<form id="memberForm" novalidate><input type="email" id="memberEmail" placeholder="you@example.com" autocomplete="email" aria-label="Your email" required>'+
+      '<button class="btn" type="submit">Email me a link</button></form>'+msg;
+    var input = document.getElementById('memberEmail');
+    input.value = typed;
+    if(hadFocus) input.focus();
+    document.getElementById('memberForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      var email = input.value.trim();
+      if(!email){ setMemberMsg('Enter your email first.', 'err'); return; }
+      var btn = e.target.querySelector('button');
+      btn.disabled = true;
+      setMemberMsg('Sending…', '');
+      try{
+        var data = await DB.requestSignIn(email);
+        setMemberMsg((data && data.message) || 'Check your inbox for a sign-in link.', 'ok');
+      }catch(err){
+        setMemberMsg(err.message || 'Could not send the link. Try again.', 'err');
+      }
+    });
+  }
+
+  function nudgeSignIn(){
+    setMemberMsg('That poll is for league members only — sign in first.', 'err');
+    memberBar.scrollIntoView({ behavior:'smooth', block:'center' });
+    memberBar.classList.remove('flash'); void memberBar.offsetWidth; memberBar.classList.add('flash');
+    var input = document.getElementById('memberEmail');
+    if(input) input.focus({ preventScroll:true });
+  }
+
+  /* index.html#signin=<token> — strip it from the address bar first so
+     a refresh or a shared URL can't try to reuse it */
+  async function redeemFromHash(){
+    var m = /^#signin=([A-Za-z0-9_-]+)/.exec(location.hash || '');
+    if(!m) return;
+    try{ history.replaceState(null, '', location.pathname + location.search + '#vote'); }catch(e){}
+    try{
+      var me = await DB.redeemSignIn(m[1]);
+      setMemberMsg('You\u2019re signed in'+(me && me.name ? ', '+me.name : '')+'. Go vote!', 'ok');
+    }catch(err){
+      setMemberMsg(err.message || 'That sign-in link didn\u2019t work. Request a new one.', 'err');
+    }
+    var vote = document.getElementById('vote');
+    if(vote) vote.scrollIntoView();
+  }
+  /* a link opened in a tab that already has the hub loaded only changes the hash */
+  window.addEventListener('hashchange', function(){
+    if(/^#signin=/.test(location.hash)) redeemFromHash().then(renderPolls);
+  });
   host.addEventListener('click', async function(e){
     if(DB.isArchived()) return;
     var btn = e.target.closest('.opt');
     if(!btn || !btn.getAttribute('data-poll')) return;
+    var pollId = btn.getAttribute('data-poll');
+    if(DB.isMembersPoll(pollId) && !DB.getMember()){ nudgeSignIn(); return; }
     btn.disabled = true;
     try{
-      await DB.castVote(btn.getAttribute('data-poll'), btn.getAttribute('data-choice'));
+      await DB.castVote(pollId, btn.getAttribute('data-choice'));
     }catch(err){
+      if(err.data && err.data.needsSignIn){
+        /* session expired or their email came off the roster */
+        try{ await DB.loadMember(); }catch(e){}
+        renderPolls();
+        nudgeSignIn();
+        return;
+      }
       alert(err.message || 'Could not record your vote. Check your connection and try again.');
       console.error(err);
     }
@@ -766,7 +882,10 @@
 
   (async function init(){
     try{
-      await DB.load();
+      /* member status is best-effort: if it fails, everything still
+         renders and members-only polls just show the sign-in strip */
+      await Promise.all([ DB.load(), DB.loadMember().catch(function(e){ console.error(e); }) ]);
+      await redeemFromHash();
     }catch(err){
       host.innerHTML = '<div class="card"><h3>Cannot reach the league data right now</h3>'+
         '<p class="hint">The shared backend is not responding. Try refreshing in a bit.</p></div>';

@@ -1,5 +1,5 @@
 const { redis, getJSON, countsKey, votersKey, readJsonBody, blockIfArchived, syncCountsCache,
-        serverError, ID_RE } = require('../lib/store');
+        serverError, ID_RE, isMembersPoll, memberVoterId, currentMember } = require('../lib/store');
 
 /* Moves/adds/removes one voter's vote in a single atomic step. Done as
    a Lua script so two votes landing at the same moment can't interleave
@@ -32,11 +32,11 @@ module.exports = async function handler(req, res){
   if(blockIfArchived(res)) return;
 
   const body = readJsonBody(req) || {};
-  const pollId = body.pollId, optionId = body.optionId, voterId = body.voterId, remove = !!body.remove;
+  const pollId = body.pollId, optionId = body.optionId, remove = !!body.remove;
+  let voterId = body.voterId;
   if(typeof pollId !== 'string' || !ID_RE.test(pollId) ||
-     typeof voterId !== 'string' || !VOTER_ID_RE.test(voterId) ||
      (!remove && (typeof optionId !== 'string' || !ID_RE.test(optionId)))){
-    return res.status(400).json({ error:'pollId, voterId, and optionId (unless removing) are required' });
+    return res.status(400).json({ error:'pollId and optionId (unless removing) are required' });
   }
 
   try{
@@ -51,6 +51,22 @@ module.exports = async function handler(req, res){
     }
     if(!remove && !(poll.options || []).some(function(o){ return o.id === optionId; })){
       return res.status(400).json({ error:'That option is not part of this poll.' });
+    }
+
+    /* Members-only polls ignore the browser's random id and key the
+       vote to the signed-in member's email, so it's one vote per
+       person across every device. Anonymous polls work as before.
+       (The anonymous id format can't contain ':' so it can never
+       collide with a 'member:' id.) 403 rather than 401 here: the
+       client treats 401 as "commissioner password is stale". */
+    if(isMembersPoll(poll)){
+      const m = await currentMember(req);
+      if(!m){
+        return res.status(403).json({ error:'This poll is for league members only — sign in with your email to vote.', needsSignIn:true });
+      }
+      voterId = memberVoterId(m.email);
+    } else if(typeof voterId !== 'string' || !VOTER_ID_RE.test(voterId)){
+      return res.status(400).json({ error:'voterId is required' });
     }
 
     await redis.eval(VOTE_SCRIPT, [countsKey(pollId), votersKey(pollId)], [voterId, remove ? '' : optionId, remove ? '1' : '0']);

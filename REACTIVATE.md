@@ -36,8 +36,9 @@ Good if it's the same ten people again. In `admin.html`:
   new season.
 
 **B. Start completely clean.** Click **Reset everything** in
-`admin.html`. This wipes the roster, all polls and their votes, and
-league facts back to the *hardcoded defaults* in `lib/store.js` (the
+`admin.html`. This wipes the roster (including members' emails, so
+re-add them before using any members-only poll), all polls and their
+votes, and league facts back to the *hardcoded defaults* in `lib/store.js` (the
 original ten names, the four original polls, the original draft
 date). If you want the reset button to seed *different* defaults next
 year — a new set of names, new poll questions, a new draft date —

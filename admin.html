@@ -66,7 +66,7 @@
   .sub{color:var(--muted);max-width:66ch;margin:0 0 22px;font-size:.92rem}
 
   .panel{background:var(--panel);border:1px solid var(--line)}
-  input[type=text],input[type=datetime-local],textarea{
+  input[type=text],input[type=email],input[type=datetime-local],textarea,select{
     background:var(--panel-2);border:1px solid var(--line);color:var(--chalk);
     font-family:"Chivo",sans-serif;font-size:.95rem;padding:10px 12px;width:100%}
   input[type=number]{background:var(--panel-2);border:1px solid var(--line);color:var(--chalk);
@@ -80,8 +80,9 @@
      row is its own grid, and with `auto` some browsers size the
      header's column from its short label text instead of the fixed
      slot widths, so the header labels drift right of the toggles.
-     Change this together with the .trow nth-child widths. */
-  .mrow{display:grid;grid-template-columns:70px 1fr 386px 40px;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
+     Change this together with the .trow nth-child widths. The two 1fr
+     columns are name and email. */
+  .mrow{display:grid;grid-template-columns:70px 1fr 1fr 386px 40px;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line)}
   .mrow.head{background:var(--panel-2);padding:8px 16px}
   .mrow.head span{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
   .mrow:last-child{border-bottom:0}
@@ -156,6 +157,23 @@
     background:rgba(255,194,74,.08);padding:4px 8px}
   .pollhead .spacer{flex:1}
   .fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+  .fields .wide{grid-column:1 / -1}
+  select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:34px;
+    background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+    background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+  .pollhead .membadge{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--blue);border:1px solid rgba(76,143,214,.55);
+    background:rgba(76,143,214,.1);padding:4px 8px}
+  .modenote{font-size:.8rem;color:var(--muted);margin:6px 0 0}
+  .modenote.warn{color:var(--warn)}
+  .voters{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .voters h4{font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);font-weight:400;margin:0 0 10px}
+  .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px 18px;font-size:.86rem}
+  .vgrid .who{color:var(--chalk)}
+  .vgrid .pick{color:var(--orange-soft)}
+  .vgrid .gone{color:var(--muted);font-style:italic}
+  .vpending{margin-top:10px;font-size:.82rem;color:var(--muted)}
   .orow{display:grid;grid-template-columns:1fr 78px 40px;gap:10px;align-items:center;margin-bottom:9px}
   .ohead{display:grid;grid-template-columns:1fr 78px 40px;gap:10px;margin-bottom:7px}
   .ohead span{font-family:"IBM Plex Mono",monospace;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
@@ -179,7 +197,8 @@
     .mrow .rowlead{grid-column:1;grid-row:1}
     .mrow input[type=text]{grid-column:2;grid-row:1}
     .mrow .x{grid-column:3;grid-row:1}
-    .mrow .trow{grid-column:1 / -1;grid-row:2;flex-wrap:wrap}
+    .mrow input[type=email]{grid-column:2 / -1;grid-row:2}
+    .mrow .trow{grid-column:1 / -1;grid-row:3;flex-wrap:wrap}
     .mrow.head{display:none}
     .fields,.grid2{grid-template-columns:1fr}
   }
@@ -293,9 +312,9 @@
 <section>
   <div class="wrap">
     <div class="shead"><span class="yard">Roster board</span><h2>Managers</h2></div>
-    <p class="sub">Names appear in this order on the hub. Drag the grip handle to reorder, or flip a switch when someone joins the Yahoo league or hands over their buy-in.</p>
+    <p class="sub">Names appear in this order on the hub. Drag the grip handle to reorder, or flip a switch when someone joins the Yahoo league or hands over their buy-in. Add an email to make someone a league member — that's the address they'll sign in with to vote on members-only polls. Emails are never shown on the hub.</p>
     <div class="panel">
-      <div class="mrow head"><span>#</span><span>Name</span><span class="trow"><span>Signed up</span><span>Paid</span><span>Discord</span></span><span></span></div>
+      <div class="mrow head"><span>#</span><span>Name</span><span>Email</span><span class="trow"><span>Signed up</span><span>Paid</span><span>Discord</span></span><span></span></div>
       <div id="mgrHost"></div>
       <div class="rowactions">
         <button class="btn sm" id="addMgr">Add manager</button>
@@ -310,6 +329,7 @@
   <div class="wrap">
     <div class="shead"><span class="yard">Voting</span><h2>Polls</h2></div>
     <p class="sub">Edit a question, rename options, or type over a vote count to record answers people gave you in person. Archiving a poll closes voting but keeps the question and its results on the hub under Archived polls; deleting removes it and its votes for good.</p>
+    <p class="sub">Each poll is <strong>anonymous</strong> by default — anyone can vote, one vote per browser. Switch one to <strong>league members only</strong> and voters have to sign in with a magic link sent to the email on their roster row; they get one vote each across every device, and you can see who picked what.</p>
     <div id="pollHost"></div>
     <button class="btn" id="addPoll">Add a poll</button>
   </div>
@@ -452,6 +472,7 @@
       el.innerHTML =
         '<span class="rowlead"><span class="draghandle" title="Drag to reorder" aria-label="Drag to reorder '+DB.esc(r.name||('slot '+n))+'"><span class="dots"></span></span><span class="slot">'+n+'</span></span>'+
         '<input type="text" value="'+DB.esc(r.name)+'" placeholder="Open slot" aria-label="Name for slot '+n+'">'+
+        '<input type="email" value="'+DB.esc(r.email||'')+'" placeholder="Email (for voting)" autocomplete="off" spellcheck="false" aria-label="Email for slot '+n+'">'+
         '<span class="trow">'+
           '<label class="toggle"><input type="checkbox"'+(r.signed?' checked':'')+' aria-label="Signed up, slot '+n+'"><span class="track"></span><span class="tlabel">Signed up</span></label>'+
           '<label class="toggle pay"><input type="checkbox"'+(r.paid?' checked':'')+' aria-label="Paid, slot '+n+'"><span class="track"></span><span class="tlabel">Paid</span></label>'+
@@ -463,6 +484,16 @@
       text.addEventListener('input', debounce(function(){
         r.name = text.value; saveBoard(DB.getBoard());
       }, 500));
+      /* saved on blur/enter rather than per keystroke, so a half-typed
+         address doesn't bounce off the server's email check */
+      var emailIn = el.querySelector('input[type=email]');
+      emailIn.addEventListener('change', async function(){
+        var prev = r.email || '';
+        r.email = emailIn.value.trim().toLowerCase();
+        emailIn.value = r.email;
+        if(!(await saveBoard(DB.getBoard()))){ r.email = prev; emailIn.value = prev; }
+        renderPolls(); /* members-only polls show who hasn't voted yet */
+      });
       var boxes = el.querySelectorAll('input[type=checkbox]');
       boxes[0].addEventListener('change', function(){ r.signed = boxes[0].checked; saveBoard(DB.getBoard()); });
       boxes[1].addEventListener('change', function(){ r.paid = boxes[1].checked; saveBoard(DB.getBoard()); });
@@ -565,21 +596,21 @@
 
   document.getElementById('addMgr').addEventListener('click', async function(){
     var all = DB.getBoard().slice();
-    all.push({name:'', signed:false, paid:false, discord:false});
+    all.push({name:'', email:'', signed:false, paid:false, discord:false});
     await saveBoard(all); renderMgrs();
     var inputs = mgrHost.querySelectorAll('input[type=text]');
     if(inputs.length) inputs[inputs.length-1].focus();
   });
   document.getElementById('clearFlags').addEventListener('click', async function(){
     if(!confirm('Set every manager back to not signed up, not paid, and not in Discord?')) return;
-    var all = DB.getBoard().map(function(r){ return { name:r.name, signed:false, paid:false, discord:false }; });
+    var all = DB.getBoard().map(function(r){ return { name:r.name, email:r.email||'', signed:false, paid:false, discord:false }; });
     await saveBoard(all); renderMgrs();
   });
   document.getElementById('restoreNames').addEventListener('click', async function(){
     if(!confirm('Replace the current names with the original ten? Switch settings are kept where slots line up.')) return;
     var cur = DB.getBoard();
     var all = DB.defaults.names.map(function(n,i){
-      return { name:n, signed: cur[i] ? cur[i].signed : false, paid: cur[i] ? cur[i].paid : false, discord: cur[i] ? cur[i].discord : false };
+      return { name:n, email: cur[i] ? (cur[i].email||'') : '', signed: cur[i] ? cur[i].signed : false, paid: cur[i] ? cur[i].paid : false, discord: cur[i] ? cur[i].discord : false };
     });
     await saveBoard(all); renderMgrs();
   });
@@ -604,6 +635,8 @@
       var total = p.options.reduce(function(s,o){ return s + (counts[o.id]||0); },0);
       var el = document.createElement('div');
       el.className = 'poll';
+      var members = p.voting === 'members';
+      var memberCount = DB.getBoard().filter(function(r){ return r.email; }).length;
 
       var optHTML = '';
       p.options.forEach(function(o, oi){
@@ -617,10 +650,20 @@
       el.innerHTML =
         '<div class="pollhead"><h3 style="font-size:1.25rem">Poll</h3><span class="pid">id: '+DB.esc(p.id)+'</span>'+
           (p.archived ? '<span class="archbadge">Archived</span>' : '')+
+          (members ? '<span class="membadge">Members only</span>' : '')+
           '<span class="spacer"></span></div>'+
         '<div class="fields">'+
           '<div><label class="f">Question</label><input type="text" class="ptitle" value="'+DB.esc(p.title)+'" placeholder="Entry fee"></div>'+
           '<div><label class="f">Note under the question</label><input type="text" class="phint" value="'+DB.esc(p.hint||'')+'" placeholder="Optional context"></div>'+
+          '<div class="wide"><label class="f">Who can vote</label>'+
+            '<select class="pvoting">'+
+              '<option value="anonymous"'+(members?'':' selected')+'>Anonymous — anyone, no sign-in (one vote per browser)</option>'+
+              '<option value="members"'+(members?' selected':'')+'>League members only — sign in with an email magic link</option>'+
+            '</select>'+
+            (members && !memberCount
+              ? '<p class="modenote warn">No one on the roster has an email yet, so nobody can vote on this poll. Add emails in the roster above.</p>'
+              : members ? '<p class="modenote">'+memberCount+' of '+DB.getBoard().length+' managers have an email and can vote.</p>' : '')+
+          '</div>'+
         '</div>'+
         '<div class="ohead"><span>Options</span><span>Votes</span><span></span></div>'+
         '<div class="opts">'+optHTML+'</div>'+
@@ -630,7 +673,8 @@
           '<button class="btn sm ghost archpoll">'+(p.archived ? 'Restore to active' : 'Archive poll')+'</button>'+
           '<button class="btn sm ghost delpoll">Delete poll</button>'+
           '<span class="total">'+total+' total</span>'+
-        '</div>';
+        '</div>'+
+        (members ? '<div class="voters"><h4>Who voted</h4><div class="vbody" style="font-size:.84rem;color:var(--muted)">Loading…</div></div>' : '');
 
       el.querySelector('.ptitle').addEventListener('input', debounce(function(e){
         var all = DB.getPolls(); all[pi].title = e.target.value; savePolls(all);
@@ -638,6 +682,17 @@
       el.querySelector('.phint').addEventListener('input', debounce(function(e){
         var all = DB.getPolls(); all[pi].hint = e.target.value; savePolls(all);
       }, 500));
+      el.querySelector('.pvoting').addEventListener('change', async function(e){
+        var mode = e.target.value;
+        if(total && !confirm('Switch "'+(p.title||'this poll')+'" to '+(mode === 'members' ? 'league members only' : 'anonymous')+'?\n\n'+
+            'The '+total+' vote'+(total===1?'':'s')+' already cast stay in the totals. Use Reset votes afterwards if you want a clean start.')){
+          e.target.value = members ? 'members' : 'anonymous';
+          return;
+        }
+        var all = DB.getPolls(); all[pi].voting = mode;
+        await savePolls(all); renderPolls();
+      });
+      if(members) loadVoters(el.querySelector('.voters .vbody'), p);
 
       el.querySelectorAll('.orow').forEach(function(row){
         var oi = parseInt(row.getAttribute('data-oi'),10);
@@ -695,6 +750,31 @@
     });
   }
 
+  /* Fills a members-only poll's "Who voted" box. Rendered async after
+     the card so a slow request never holds up the editor. */
+  async function loadVoters(box, p){
+    var voters;
+    try{ voters = await DB.getVoters(p.id); }
+    catch(err){ box.textContent = 'Couldn\u2019t load voters: '+err.message; return; }
+    var label = {};
+    p.options.forEach(function(o){ label[o.id] = o.label || o.id; });
+    var voted = {};
+    var html = '';
+    if(!voters.length){
+      html = '<p style="margin:0">No member votes yet.</p>';
+    } else {
+      html = '<div class="vgrid">'+voters.map(function(v){
+        voted[v.email] = true;
+        var who = v.onRoster ? DB.esc(v.name || v.email) : '<span class="gone">'+DB.esc(v.email)+' (no longer on roster)</span>';
+        return '<div><span class="who">'+who+'</span> &rarr; <span class="pick">'+DB.esc(label[v.optionId] || v.optionId+' (removed option)')+'</span></div>';
+      }).join('')+'</div>';
+    }
+    var waiting = DB.getBoard().filter(function(r){ return r.email && !voted[String(r.email).toLowerCase()]; })
+      .map(function(r){ return r.name || r.email; });
+    if(waiting.length) html += '<p class="vpending">Still to vote: '+waiting.map(DB.esc).join(', ')+'</p>';
+    box.innerHTML = html;
+  }
+
   document.getElementById('addPoll').addEventListener('click', function(){
     var title = prompt('What is the question?', '');
     if(title === null) return;
@@ -706,6 +786,7 @@
       id: DB.uniqueId(title, taken),
       title: title,
       hint: '',
+      voting: 'anonymous',
       options: [{id:'option-1',label:''},{id:'option-2',label:''}]
     });
     savePolls(all); renderPolls();
@@ -890,8 +971,14 @@
     }catch(err){ flashError(err.message); console.error(err); }
   });
 
-  /* private snapshots only list once the password is in */
-  window.addEventListener('fambam:unlocked', function(){ renderSnapshots(); });
+  /* Private snapshots and member emails only come back once the
+     password is in — so reload everything on unlock. Without this, a
+     page opened while locked would hold an email-less roster, and the
+     first roster edit would save it that way. */
+  window.addEventListener('fambam:unlocked', async function(){
+    try{ await DB.load(); }catch(err){ console.error(err); }
+    renderMgrs(); renderPolls(); fillSettingsForm(); refreshExport(); renderSnapshots();
+  });
 
   (async function init(){
     try{

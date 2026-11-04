@@ -41,6 +41,32 @@ with a password of your choosing (something better than the old
 `football`), then redeploy. Without it, `admin.html` can't save
 anything. See "Security, honestly" below.
 
+## 3c. Turn on email sign-in (only needed for members-only polls)
+
+Polls are anonymous by default and need none of this. To let the
+commissioner switch a poll to **League members only**, the site has to
+be able to email sign-in links. It uses [Resend](https://resend.com)
+(free tier: 3,000 emails/month) over plain HTTPS — no extra package.
+
+1. Sign up at resend.com, add and verify your domain (a few DNS
+   records at your registrar; Resend walks you through it), then
+   create an API key.
+2. In Vercel → **Settings → Environment Variables**, add:
+   - `RESEND_API_KEY` — the key from step 1.
+   - `MAIL_FROM` — the sender, on the domain you verified, e.g.
+     `FamBam Fantasy Football <commish@yourdomain.com>`.
+   - `SITE_URL` — the site's public address, e.g.
+     `https://fambamff.com`. Sign-in links are built from this. (If
+     it's missing, the link falls back to whatever host the request
+     came in on — fine on Vercel, but set it anyway.)
+3. Redeploy.
+4. In `admin.html`, put each manager's email on their roster row,
+   then set a poll's **Who can vote** to *League members only*.
+
+Without `RESEND_API_KEY`/`MAIL_FROM`, anonymous polls keep working;
+the "Email me a link" button on a members-only poll just reports that
+email sign-in isn't set up.
+
 ## 4. Add your domain
 
 Project → **Domains** → add your domain → follow the DNS instructions
@@ -61,9 +87,30 @@ HTTPS is automatic.
   or settings. `index.html` is read-only except for casting votes.
 - Vote counts live in Redis hashes (`poll:<id>:counts`); who-voted-for-what
   lives in a separate hash (`poll:<id>:voters`) so a person can change
-  their vote without double-counting. There's no login, so a random id
-  is generated per browser and stored in `localStorage` to identify
-  "this device already voted" — nothing that identifies a person.
+  their vote without double-counting. What a "voter" is depends on the
+  poll's `voting` field:
+  - `anonymous` (the default, and what a poll with no `voting` field
+    means): a random id generated per browser and kept in
+    `localStorage` — "this device already voted", nothing that
+    identifies a person.
+  - `members`: `member:<email>` of the signed-in league member, so it's
+    one vote per person across all their devices, and the commissioner
+    can see who picked what (admin page → the poll's "Who voted" box).
+- **League members** are roster rows with an `email`. Emails are only
+  returned by `/api/state` to a request carrying the commissioner
+  password; everyone else gets the roster without them, and snapshots
+  never store them.
+- **Member sign-in** (`/api/member`) is a magic link. Asking for one
+  stores a SHA-256 hash of a random token (`magic:<hash>`, 20-minute
+  expiry, single use) and emails `index.html#signin=<token>`. The hub
+  posts the token back and gets a 30-day `HttpOnly; Secure;
+  SameSite=Lax` cookie whose hashed id maps to the email
+  (`member_session:<hash>`). Every vote re-checks that email against
+  the current roster, so removing someone's email from the board cuts
+  off their votes immediately. The link points at the page, not the
+  API, so email scanners that pre-open links can't burn the token.
+- Switching a poll between anonymous and members-only keeps the votes
+  already cast; use **Reset votes** for a clean start.
 - The admin page's manual vote-count fields (for recording votes given
   in person) directly overwrite the count for that option — they don't
   interact with the voter-tracking hash, so if someone later changes
@@ -106,10 +153,19 @@ right, then keeps it in `sessionStorage` for that tab only.
 - Inputs are validated (shape, lengths, ids), and server errors are
   logged rather than echoed to the browser.
 
-What is still open by design: **voting has no login.** A vote is tied
-to a random id in the browser's `localStorage`, so someone could vote
-again from a private window or another device. That's fine for family
-polls; don't use it for anything that really needs to be tamper-proof.
+What is still open by design: **anonymous polls have no login.** A
+vote is tied to a random id in the browser's `localStorage`, so someone
+could vote again from a private window or another device. That's fine
+for family polls. When a vote should count once per person, switch the
+poll to **League members only**: then a vote needs a session from a
+magic link sent to an email on the roster, so it's as strong as that
+person's inbox.
+
+- Asking for a sign-in link gives the same answer whether or not the
+  email is on the roster, so the form can't be used to find out who's
+  in the league. Requests are capped at 10 per IP and 3 per address
+  every 15 minutes.
+- Only hashes of sign-in tokens and session ids are stored in Redis.
 Votes can only go to polls and options that actually exist, and the
 count update is a single atomic Redis script, so simultaneous votes
 can't skew the tallies.

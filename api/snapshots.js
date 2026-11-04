@@ -14,7 +14,7 @@ const {
   redis, getJSON, setJSON, readJsonBody,
   SNAPSHOTS_INDEX_KEY, snapshotKey, slugId,
   getCountsForPolls, DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard,
-  requireAdmin, serverError
+  requireAdmin, serverError, publicBoard
 } = require('../lib/store');
 
 const SNAP_ID_RE = /^[a-z0-9-]{1,80}$/;
@@ -68,7 +68,8 @@ async function route(req, res) {
       if (!label) { res.status(400).json({ error: 'A label is required to create a snapshot.' }); return; }
 
       const id = slugId(label);
-      const board = await getJSON('board', defaultBoard());
+      /* never freeze member emails into a snapshot — any ?id= is readable */
+      const board = publicBoard(await getJSON('board', defaultBoard()));
       const polls = await getJSON('polls', DEFAULT_POLLS);
       const settings = await getJSON('settings', DEFAULT_SETTINGS);
       const counts = await getCountsForPolls(polls);
