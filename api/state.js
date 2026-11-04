@@ -1,5 +1,5 @@
 const { getJSON, setJSON, getCountsForPolls,
-        DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard, isArchived } = require('../lib/store');
+        DEFAULT_POLLS, DEFAULT_SETTINGS, defaultBoard, isArchived, serverError } = require('../lib/store');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'GET') return res.status(405).json({ error:'GET only' });
@@ -18,6 +18,6 @@ module.exports = async function handler(req, res){
 
     res.status(200).json({ board: board, polls: polls, settings: settings, counts: counts, archived: isArchived() });
   }catch(err){
-    res.status(500).json({ error: String((err && err.message) || err) });
+    serverError(res, err);
   }
 };

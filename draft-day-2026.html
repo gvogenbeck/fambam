@@ -8,86 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Chivo:wght@300;400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
 <style>
-  :root{
-    --field:#070B12;--panel:#0E1626;--panel-2:#131F33;--deep:#002244;
-    --orange:#FB4F14;--orange-soft:#FF8A55;--blue:#4C8FD6;
-    --chalk:#EEF3F8;--muted:#8C9AAC;--line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.16);
-  }
-  *{box-sizing:border-box}
-  [hidden]{display:none!important}
-  html{scroll-behavior:smooth}
-  body{margin:0;overflow-x:hidden;
-    background:
-      radial-gradient(1100px 620px at 78% -12%, rgba(251,79,20,.16), transparent 62%),
-      radial-gradient(900px 620px at 8% 0%, rgba(0,34,68,.85), transparent 60%),
-      var(--field);
-    color:var(--chalk);font-family:"Chivo",system-ui,sans-serif;font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased}
-  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-    background:repeating-linear-gradient(90deg,rgba(255,255,255,.045) 0 1px,transparent 1px 88px);
-    mask-image:linear-gradient(180deg,transparent,#000 12%,#000 88%,transparent)}
-  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 22px}
-  a{color:var(--orange-soft)}
-  h1,h2,h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:800;letter-spacing:.01em;text-transform:uppercase;margin:0}
-  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
-
-  .topbar{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);background:rgba(7,11,18,.82);border-bottom:1px solid var(--line)}
-  .topbar .wrap{display:flex;align-items:center;gap:18px;min-height:60px;position:relative}
-  .mark{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:.06em;text-transform:uppercase}
-  a.mark{color:inherit;text-decoration:none}
-  .mark span{color:var(--orange)}
-  .topnav{margin-left:auto;display:flex;gap:26px;align-items:center}
-  .topnav a{font-family:"IBM Plex Mono",monospace;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--chalk);text-decoration:none}
-  .topnav a:hover,.topnav a:focus-visible{color:var(--orange-soft)}
-  .topnav a.on{color:var(--orange)}
-  .topnav a.cta{color:var(--orange);border:1px solid rgba(251,79,20,.5);padding:7px 13px;font-weight:600;font-size:.72rem}
-  .topnav a.cta:hover,.topnav a.cta:focus-visible{color:#0A0A0A;background:var(--orange);border-color:var(--orange)}
-
-  .navgroup{position:relative}
-  .navtrig{font-family:"IBM Plex Mono",monospace;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--chalk);background:none;border:none;padding:6px 0;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
-    border-bottom:2px solid transparent}
-  .navtrig:hover,.navtrig:focus-visible{color:var(--orange-soft)}
-  .navtrig[aria-expanded="true"]{color:var(--chalk);border-bottom-color:var(--orange)}
-  .navtrig .caret{font-size:.6rem;line-height:1;transition:transform .15s ease}
-  .navtrig[aria-expanded="true"] .caret{transform:rotate(180deg)}
-
-  .navpanel{position:absolute;top:calc(100% + 14px);right:0;width:440px;z-index:40;
-    background:var(--panel);border:1px solid var(--line-strong);border-top:2px solid var(--orange);
-    padding:16px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
-  .navgrid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
-  .navpanel a.navitem{display:block;padding:11px 12px;text-decoration:none;letter-spacing:0;text-transform:none;
-    font-family:"Chivo",sans-serif;font-size:.95rem;color:var(--chalk);transition:background .12s ease}
-  .navpanel a.navitem:hover,.navpanel a.navitem:focus-visible{background:rgba(255,255,255,.05);color:var(--chalk)}
-  .navitem .ni-t{display:block;margin-bottom:3px}
-  .navitem .ni-d{display:block;font-size:.78rem;color:var(--muted);line-height:1.45}
-  .navitem .ni-t .ext{font-size:.72rem;color:var(--orange-soft);margin-left:5px;letter-spacing:.04em}
-
-  .navtoggle{display:none;margin-left:auto;background:none;border:1px solid var(--line-strong);
-    width:38px;height:34px;flex-direction:column;justify-content:center;align-items:center;gap:5px;cursor:pointer;flex-shrink:0}
-  .navtoggle span{display:block;width:18px;height:2px;background:var(--chalk)}
-
-  @media (max-width:900px){
-    .navtoggle{display:flex}
-    .topnav{
-      display:none;margin-left:0;
-      position:absolute;left:0;right:0;top:100%;
-      flex-direction:column;align-items:stretch;gap:0;
-      background:rgba(7,11,18,.99);border:1px solid var(--line);border-top:none;
-      padding:8px 22px 18px;z-index:30;max-height:calc(100vh - 60px);overflow-y:auto
-    }
-    .topnav.open{display:flex}
-    .topnav a{padding:12px 0;width:100%}
-    .topnav a.cta{margin-top:10px;width:auto;align-self:flex-start}
-    .navgroup{width:100%}
-    .navtrig{width:100%;justify-content:space-between;padding:12px 0;border-bottom:none}
-    .navtrig[aria-expanded="true"]{border-bottom-color:transparent;color:var(--orange)}
-    .navpanel{position:static;width:auto;box-shadow:none;border:none;border-left:2px solid var(--orange);
-      background:rgba(255,255,255,.03);padding:6px 0 10px 12px;margin-bottom:8px}
-    .navgrid{grid-template-columns:1fr;gap:0}
-    .navpanel a.navitem{padding:10px 10px}
-  }
-
   .crumb{padding:22px 0 0;font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
   .crumb a{color:var(--muted)}
   .crumb a:hover{color:var(--orange-soft)}
@@ -106,8 +28,6 @@
   .frame .cap .num{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--orange);flex-shrink:0}
   .frame .cap p{margin:0;color:var(--muted);font-size:.92rem;line-height:1.55}
 
-  footer{border-top:1px solid var(--line);padding:38px 0 60px;color:var(--muted);font-size:.84rem}
-  footer .wrap{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
 </style>
 </head>
 <body>
@@ -148,60 +68,7 @@
     </nav>
   </div>
 </div>
-<script>
-(function(){
-  "use strict";
-  var btn = document.getElementById('navToggle'), nav = document.getElementById('topnav');
-  if(!btn || !nav) return;
-
-  btn.addEventListener('click', function(){
-    var open = nav.classList.toggle('open');
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if(!open) closeAll();
-  });
-
-  var groups = [];
-  Array.prototype.forEach.call(nav.querySelectorAll('.navgroup'), function(g){
-    groups.push({ trig: g.querySelector('.navtrig'), panel: g.querySelector('.navpanel') });
-  });
-
-  function setOpen(entry, open){
-    entry.trig.setAttribute('aria-expanded', open ? 'true' : 'false');
-    entry.panel.hidden = !open;
-  }
-  function closeAll(except){
-    groups.forEach(function(e){ if(e !== except) setOpen(e, false); });
-  }
-
-  groups.forEach(function(entry){
-    entry.trig.addEventListener('click', function(e){
-      e.stopPropagation();
-      var open = entry.trig.getAttribute('aria-expanded') === 'true';
-      closeAll(entry);
-      setOpen(entry, !open);
-    });
-  });
-
-  nav.addEventListener('click', function(e){
-    if(e.target.closest && e.target.closest('a')){
-      closeAll();
-      nav.classList.remove('open');
-      btn.setAttribute('aria-expanded','false');
-    }
-  });
-
-  document.addEventListener('click', function(e){
-    if(!nav.contains(e.target) && e.target !== btn && !btn.contains(e.target)) closeAll();
-  });
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape'){
-      closeAll();
-      nav.classList.remove('open');
-      btn.setAttribute('aria-expanded','false');
-    }
-  });
-})();
-</script>
+<script src="assets/nav.js"></script>
 
 <p class="crumb wrap"><a href="record-book.html">Record Book</a> &rarr; Draft Day 2026</p>
 
@@ -218,37 +85,37 @@
   <div class="story">
 
     <div class="frame">
-      <div class="ph"><img src="assets/record-book/draft-day-2026-02.jpg" alt="The blank Commish Kit draft board propped on the kitchen counter before the draft began, rounds one through twenty listed with no picks filled in yet" loading="lazy"></div>
+      <div class="ph"><img src="assets/record-book/draft-day-2026-02-800w.jpg" srcset="assets/record-book/draft-day-2026-02-800w.jpg 800w, assets/record-book/draft-day-2026-02.jpg 1600w" sizes="(max-width: 864px) calc(100vw - 44px), 820px" width="1600" height="1200" alt="The blank Commish Kit draft board propped on the kitchen counter before the draft began, rounds one through twenty listed with no picks filled in yet" loading="lazy"></div>
       <div class="cap"><span class="num">01</span><p>Ready to go!</p></div>
     </div>
 
     <div class="frame">
-      <div class="ph"><img src="assets/record-book/draft-day-2026-04.jpg" alt="A young kid reaching up to place a player sticker onto the draft board" loading="lazy"></div>
+      <div class="ph"><img src="assets/record-book/draft-day-2026-04-800w.jpg" srcset="assets/record-book/draft-day-2026-04-800w.jpg 800w, assets/record-book/draft-day-2026-04.jpg 1600w" sizes="(max-width: 864px) calc(100vw - 44px), 820px" width="1600" height="901" alt="A young kid reaching up to place a player sticker onto the draft board" loading="lazy"></div>
       <div class="cap"><span class="num">02</span><p>It's a long way to reach the top.</p></div>
     </div>
 
     <div class="frame">
-      <div class="ph"><img src="assets/record-book/draft-day-2026-01.jpg" alt="The whole group seated around the dining table for the draft, laptops and printed sheets spread out, buy-in cash on the table" loading="lazy"></div>
+      <div class="ph"><img src="assets/record-book/draft-day-2026-01-800w.jpg" srcset="assets/record-book/draft-day-2026-01-800w.jpg 800w, assets/record-book/draft-day-2026-01.jpg 1200w" sizes="(max-width: 864px) calc(100vw - 44px), 820px" width="1200" height="1600" alt="The whole group seated around the dining table for the draft, laptops and printed sheets spread out, buy-in cash on the table" loading="lazy"></div>
       <div class="cap"><span class="num">03</span><p>At least someone paid their league fee.</p></div>
     </div>
 
     <div class="frame">
-      <div class="ph"><img src="assets/record-book/draft-day-2026-03.jpg" alt="A woman standing at the counter reviewing colored player sticker sheets next to the partially filled draft board" loading="lazy"></div>
+      <div class="ph"><img src="assets/record-book/draft-day-2026-03-800w.jpg" srcset="assets/record-book/draft-day-2026-03-800w.jpg 800w, assets/record-book/draft-day-2026-03.jpg 1600w" sizes="(max-width: 864px) calc(100vw - 44px), 820px" width="1600" height="1200" alt="A woman standing at the counter reviewing colored player sticker sheets next to the partially filled draft board" loading="lazy"></div>
       <div class="cap"><span class="num">04</span><p>FamBam Draft Day 2026.</p></div>
     </div>
 
     <div class="frame">
-      <div class="ph"><img src="assets/record-book/draft-day-2026-05.jpg" alt="Two managers at the table mid-conversation, one holding a phone, the other making a peace sign" loading="lazy"></div>
+      <div class="ph"><img src="assets/record-book/draft-day-2026-05-800w.jpg" srcset="assets/record-book/draft-day-2026-05-800w.jpg 800w, assets/record-book/draft-day-2026-05.jpg 1600w" sizes="(max-width: 864px) calc(100vw - 44px), 820px" width="1600" height="1200" alt="Two managers at the table mid-conversation, one holding a phone, the other making a peace sign" loading="lazy"></div>
       <div class="cap"><span class="num">05</span><p>More paperwork than a DND session.</p></div>
     </div>
 
     <div class="frame">
-      <div class="ph"><img src="assets/record-book/draft-day-2026-07.jpg" alt="The completed draft board, every round filled in from one through twenty, signed and dated" loading="lazy"></div>
+      <div class="ph"><img src="assets/record-book/draft-day-2026-07-800w.jpg" srcset="assets/record-book/draft-day-2026-07-800w.jpg 800w, assets/record-book/draft-day-2026-07.jpg 1600w" sizes="(max-width: 864px) calc(100vw - 44px), 820px" width="1600" height="1200" alt="The completed draft board, every round filled in from one through twenty, signed and dated" loading="lazy"></div>
       <div class="cap"><span class="num">06</span><p>The picks are in!</p></div>
     </div>
 
     <div class="frame">
-      <div class="ph"><img src="assets/record-book/draft-day-2026-06.jpg" alt="The draft board most of the way filled in, photographed close on the table next to a tape dispenser and pens" loading="lazy"></div>
+      <div class="ph"><img src="assets/record-book/draft-day-2026-06-800w.jpg" srcset="assets/record-book/draft-day-2026-06-800w.jpg 800w, assets/record-book/draft-day-2026-06.jpg 1600w" sizes="(max-width: 864px) calc(100vw - 44px), 820px" width="1600" height="1200" alt="The draft board most of the way filled in, photographed close on the table next to a tape dispenser and pens" loading="lazy"></div>
       <div class="cap"><span class="num">07</span><p>The Football for Dummies book is a nice touch.</p></div>
     </div>
 

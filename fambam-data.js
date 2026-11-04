@@ -51,11 +51,31 @@
     try{ localStorage.setItem(myVoteKey(pollId), optionId); }catch(e){}
   }
 
+  /* The commissioner password, held for this tab only (sessionStorage)
+     once admin.html has verified it with /api/auth. Sent as a header
+     on every request; the server is what actually checks it. */
+  var ADMIN_KEY = 'fambam.admin.key';
+  function getAdminKey(){
+    try{ return sessionStorage.getItem(ADMIN_KEY) || ''; }catch(e){ return ''; }
+  }
+  function setAdminKey(k){
+    try{ if(k) sessionStorage.setItem(ADMIN_KEY, k); else sessionStorage.removeItem(ADMIN_KEY); }catch(e){}
+  }
+
   async function api(path, opts){
-    var res = await fetch('/api/'+path, opts);
+    opts = opts || {};
+    var headers = Object.assign({}, opts.headers || {});
+    var key = getAdminKey();
+    if(key) headers['x-admin-key'] = key;
+    var res = await fetch('/api/'+path, Object.assign({}, opts, { headers: headers }));
     var data = null;
     try{ data = await res.json(); }catch(e){}
     if(!res.ok){
+      if(res.status === 401){
+        /* stale or wrong password — forget it and let the page re-lock */
+        setAdminKey('');
+        try{ window.dispatchEvent(new CustomEvent('fambam:unauthorized')); }catch(e){}
+      }
       throw new Error((data && data.error) || ('Request to '+path+' failed with status '+res.status));
     }
     return data;
@@ -79,7 +99,33 @@
     return cache;
   }
 
-  var MOUNTAIN_OFFSET = '-06:00'; /* MDT, in effect through early Nov */
+  /* League time zone. draftISO is a wall-clock time ("2026-09-05T16:00")
+     in this zone; the UTC offset is worked out for that specific date
+     so daylight saving (MDT -6 / MST -7) is always right. */
+  var LEAGUE_TZ = 'America/Denver';
+
+  /* Offset of tz from UTC, in minutes, at the given instant. */
+  function tzOffsetMinutes(tz, date){
+    var parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hourCycle: 'h23',
+      year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit'
+    }).formatToParts(date);
+    var v = {};
+    parts.forEach(function(p){ v[p.type] = Number(p.value); });
+    var asUTC = Date.UTC(v.year, v.month - 1, v.day, v.hour, v.minute, v.second);
+    return Math.round((asUTC - date.getTime()) / 60000);
+  }
+
+  /* Interpret a "YYYY-MM-DDTHH:MM[:SS]" wall-clock time as being in tz. */
+  function zonedTime(iso, tz){
+    var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(iso);
+    if(!m) return null;
+    var guess = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
+    /* two passes so a guess that lands across a DST change self-corrects */
+    var off = tzOffsetMinutes(tz, new Date(guess));
+    off = tzOffsetMinutes(tz, new Date(guess - off * 60000));
+    return new Date(guess - off * 60000);
+  }
 
   window.FamBam = {
     /* lifecycle */
@@ -88,6 +134,16 @@
     isLoaded: function(){ return loaded; },
     isArchived: function(){ return !!cache.archived; },
 
+    /* commissioner auth — verifyAdmin asks the server; on success the
+       password is remembered for this tab and sent with each write */
+    verifyAdmin: async function(password){
+      setAdminKey('');
+      await postJSON('auth', { password: password });
+      setAdminKey(password);
+    },
+    hasAdminKey: function(){ return !!getAdminKey(); },
+    forgetAdmin: function(){ setAdminKey(''); },
+
     /* helpers */
     esc: esc,
     slug: slug,
@@ -95,8 +151,8 @@
     draftDate: function(){
       var iso = (cache.settings && cache.settings.draftISO) || '';
       if(!iso) return null;
-      var s = iso.length === 16 ? iso + ':00' : iso;
-      return new Date(s + MOUNTAIN_OFFSET);
+      try{ return zonedTime(iso, LEAGUE_TZ); }
+      catch(e){ return null; }
     },
 
     /* getters — read the in-memory cache populated by load()/refresh() */

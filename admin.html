@@ -194,31 +194,49 @@
   <div class="box">
     <p class="eyebrow">FamBam FF</p>
     <h1>Commissioner access</h1>
-    <p>This page is just behind a shared password — enter it to continue.</p>
+    <p>Enter the commissioner password to continue.</p>
     <input type="password" id="lockInput" placeholder="Password" autocomplete="off" autofocus>
     <div class="err" id="lockErr"></div>
     <button class="btn sm" id="lockGo">Enter</button>
   </div>
 </div>
+<script src="fambam-data.js"></script>
 <script>
+/* The lock screen asks the SERVER whether the password is right
+   (/api/auth). Nothing secret lives in this page; the password is
+   kept in sessionStorage for this tab and sent with each write, and
+   every write endpoint re-checks it. */
 (function(){
   "use strict";
-  var PASS = "football";
-  var body = document.body, input = document.getElementById('lockInput'), err = document.getElementById('lockErr');
-  function tryUnlock(){
-    if(input.value === PASS){
-      try{ sessionStorage.setItem('fambam.admin.unlocked','1'); }catch(e){}
+  var DB = window.FamBam;
+  var body = document.body, input = document.getElementById('lockInput'),
+      err = document.getElementById('lockErr'), go = document.getElementById('lockGo');
+  function lock(msg){
+    body.classList.add('locked');
+    err.textContent = msg || '';
+    input.value = '';
+    input.focus();
+  }
+  async function tryUnlock(){
+    var pw = input.value;
+    if(!pw){ err.textContent = 'Enter the password.'; return; }
+    go.disabled = true; err.textContent = 'Checking…';
+    try{
+      await DB.verifyAdmin(pw);
+      err.textContent = '';
       body.classList.remove('locked');
-    } else {
-      err.textContent = 'Wrong password — try again.';
-      input.value = '';
-      input.focus();
+      window.dispatchEvent(new Event('fambam:unlocked'));
+    }catch(e){
+      lock(e.message || 'Wrong password — try again.');
+    }finally{
+      go.disabled = false;
     }
   }
-  try{
-    if(sessionStorage.getItem('fambam.admin.unlocked') === '1') body.classList.remove('locked');
-  }catch(e){}
-  document.getElementById('lockGo').addEventListener('click', tryUnlock);
+  if(DB.hasAdminKey()) body.classList.remove('locked');
+  window.addEventListener('fambam:unauthorized', function(){
+    lock('Your session expired or the password changed — enter it again.');
+  });
+  go.addEventListener('click', tryUnlock);
   input.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryUnlock(); });
 })();
 </script>
@@ -257,8 +275,7 @@
     <p class="eyebrow">Control room</p>
     <h1>League admin</h1>
     <p>Edit the roster board, run the polls, and set the facts in the hero. Every change saves the moment you make it and shows up on the league hub on refresh.</p>
-    <div class="warnbar"><strong>No sign-in yet.</strong> Anyone who opens this page can change league data. Fine while it lives on your machine — put auth in front of it before this goes online.</div>
-    <div class="warnbar" id="archiveBanner" style="display:none;border-left-color:var(--orange);background:rgba(251,79,20,.08)"><strong>Site archived.</strong> Editing is turned off for this season. See <code>REACTIVATE.md</code> in the repo for how to bring it back for a new year.</div>
+        <div class="warnbar" id="archiveBanner" style="display:none;border-left-color:var(--orange);background:rgba(251,79,20,.08)"><strong>Site archived.</strong> Editing is turned off for this season. See <code>REACTIVATE.md</code> in the repo for how to bring it back for a new year.</div>
   </div>
 </header>
 
@@ -375,7 +392,6 @@
   <div class="wrap">FamBam Fantasy Football &middot; commissioner tools &middot; <a href="index.html">back to the hub</a></div>
 </footer>
 
-<script src="fambam-data.js"></script>
 <script>
 (function(){
   "use strict";
@@ -862,6 +878,9 @@
       renderSnapshots();
     }catch(err){ flashError(err.message); console.error(err); }
   });
+
+  /* private snapshots only list once the password is in */
+  window.addEventListener('fambam:unlocked', function(){ renderSnapshots(); });
 
   (async function init(){
     try{

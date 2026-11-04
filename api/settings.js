@@ -1,18 +1,19 @@
-const { setJSON, readJsonBody, blockIfArchived } = require('../lib/store');
+const { setJSON, readJsonBody, blockIfArchived, requireAdmin, serverError, validateSettings } = require('../lib/store');
 
 module.exports = async function handler(req, res){
   if(req.method !== 'POST') return res.status(405).json({ error:'POST only' });
   if(blockIfArchived(res)) return;
 
-  const body = readJsonBody(req);
-  if(!body || typeof body !== 'object' || Array.isArray(body)){
-    return res.status(400).json({ error:'Body must be a settings object' });
-  }
-
   try{
+    if(!(await requireAdmin(req, res))) return;
+
+    const body = readJsonBody(req);
+    const invalid = validateSettings(body);
+    if(invalid) return res.status(400).json({ error: invalid });
+
     await setJSON('settings', body);
     res.status(200).json({ ok:true });
   }catch(err){
-    res.status(500).json({ error: String((err && err.message) || err) });
+    serverError(res, err);
   }
 };
