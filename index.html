@@ -150,7 +150,12 @@
     border:1px solid var(--line-strong);color:var(--muted);padding:3px 8px;margin-left:10px;vertical-align:middle}
 
   .board{border:1px solid var(--line);background:var(--panel)}
-  .brow{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+  /* The chip column is an explicit width (the three .crow slots below,
+     122+104+140, plus two 10px gaps) rather than `auto`. Each row is its
+     own grid, and with `auto` some browsers size the header's column from
+     its short label text instead of the fixed slot widths, so the header
+     labels drift right of the chips. Change this with the slot widths. */
+  .brow{display:grid;grid-template-columns:46px 1fr 386px;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
   .brow.head{background:var(--panel-2);border-bottom:1px solid var(--line-strong);padding:9px 16px}
   .brow.head span{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
   .brow:last-child{border-bottom:0}
@@ -165,6 +170,8 @@
      than by content means a header label and a data chip in the same
      slot are ALWAYS the same width, and PAID/UNPAID can't make the
      Buy-in column jump around depending which state a row is in. */
+  .crow > *{min-width:0}
+  .brow.head .crow > span{text-align:center}
   .crow > :nth-child(1){flex:0 0 122px}
   .crow > :nth-child(2){flex:0 0 104px}
   .crow > :nth-child(3){flex:0 0 140px}
